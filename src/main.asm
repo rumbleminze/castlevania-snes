@@ -31,15 +31,15 @@
 .include "bank5.asm"
 .include "bank6.asm"
 
-; These are optional if the game uses CH ROM
-; .include "chrom-tiles-0.asm"
-; .include "chrom-tiles-1.asm"
-; .include "chrom-tiles-2.asm"
-; .include "chrom-tiles-3.asm"
-; .include "chrom-tiles-4.asm"
-; .include "chrom-tiles-5.asm"
-; .include "chrom-tiles-6.asm"
-; .include "chrom-tiles-7.asm"
+; these are pre-converted banks of tiles that we can use instead of converting
+; the NES tiles on the fly
+.include "tile_bank0.asm"
+.include "tile_bank1.asm"
+.include "tile_bank2.asm"
+.include "tile_bank3.asm"
+
+.include "tile_bank6.asm"
+
 ; these are tiles I use for intro/menu screens
 .include "chrom-basic-intro-tiles.asm"
 

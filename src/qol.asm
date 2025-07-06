@@ -1,0 +1,2 @@
+; QOL_SETTINGS = $081D
+; HOVER_TICK   = $081F

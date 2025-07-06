@@ -48,16 +48,42 @@ infidelitys_scroll_handling:
 
 
 setup_hdma:
-  LDA $200
-  CMP #$C5
-  BEQ :+
-    JMP nohud
-  :
+; TODO figure out when we don't have hud, migh tbe able to skip
+  ; LDA $200
+  ; CMP #$C5
+  ; BEQ :+
+  ;   JMP nohud
+  ; :
 
   ; line count
   ;   HOFS_LB, HOFS_HB, VOFS_LB, VOFS_LB
   ; x3
   ; 00
+  ; set up 47 lines of hud
+  LDA #47
+  STA SCROLL_HDMA_START
+  STZ SCROLL_HDMA_START + 1
+  STZ SCROLL_HDMA_START + 2
+  STZ SCROLL_HDMA_START + 3
+  STZ SCROLL_HDMA_START + 4
+
+  LDA #1
+  STA SCROLL_HDMA_START + 5
+  LDA curr_hoff_low  
+  STA SCROLL_HDMA_START + 6
+  LDA curr_ppu_ctrl_value
+  AND #$01
+  STA SCROLL_HDMA_START + 7
+  LDX curr_voff_low
+  LDA $A0A180,X
+  STA SCROLL_HDMA_START + 8
+  LDX curr_ppu_ctrl_value
+  LDA $A0A610,X
+  STA SCROLL_HDMA_START + 9
+  STZ SCROLL_HDMA_START + 10
+
+  rtl
+
 
   LDX curr_voff_low
   LDA $A0A080,X

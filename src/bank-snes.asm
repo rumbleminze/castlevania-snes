@@ -212,18 +212,17 @@ intro_done:
   JSR write_default_palettes
   LDA #$FF
   STA PALETTE_FILTER
+
   ; JSR write_stack_adjustment_routine_to_ram
   ; JSR write_sound_hijack_routine_to_ram
-  LDA #$03
+
+  LDA #$00
   STA ACTIVE_NES_BANK
 
-  LDA #$02
-  STA $4D
-
-  LDA #$A4
+  LDA #$A1
   PHA
   PLB 
-  JML $A4E70A
+  JML $A1C008
 
 
   snes_nmi:
@@ -480,7 +479,7 @@ msu_movie_rti:
   RTI
 
 check_for_palette_swap:
-  LDA $24 ; check that we're paused
+  LDA $22 ; check that we're paused
   BEQ :+
 
   LDA $F5
@@ -539,10 +538,10 @@ dma_values:
 
   .include "scrolling.asm"
   .include "input.asm"  
-  ; .include "konamicode.asm"
   .include "tiles.asm"
   .include "windows.asm"
   .include "hardware-status-switches.asm"
+  .include "castlevania_rewrites.asm"
 
   .include "hdma_scroll_lookups.asm"
 
@@ -581,7 +580,7 @@ wram_routines:
   .incbin "wram_routines_v0.bin"
 .endif
 
-.segment "PRGA0C"
-fixeda0:
-.include "bank7.asm"
-fixeda0_end:
+; .segment "PRGA0C"
+; fixeda0:
+; .include "bank7.asm"
+; fixeda0_end:

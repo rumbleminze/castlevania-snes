@@ -23,14 +23,15 @@ import (
 //
 // with 16 bytes per line
 func main() {
-	inputFile := flag.String("in", "Lifeforce (U).nes", "input file to split out")
+	inputFile := flag.String("in", "../resources/Castlevania (U) (PRG1).nes", "input file to split out")
 
 	inputBytes, _ := ioutil.ReadFile(*inputFile)
 	var banks [][]byte
 	var bankSize = 0x4000
 
 	// remove the header
-	headerLess := inputBytes[0x10:]
+	headerLess := inputBytes
+
 
 	for i := 0; i < len(headerLess); i += bankSize {
 		end := i + bankSize
@@ -41,6 +42,46 @@ func main() {
 
 		banks = append(banks, headerLess[i:end])
 	}
+
+	tileBanks := []int{0, 1, 2, 3, 6}
+	offsets := []int{0x3501, 8, 8, 8, 0, 0, 0x3117}
+	// write out banks of tile data that we may use
+	for _, tileBank := range tileBanks {
+		var bankFile, _ = os.Create(fmt.Sprintf("tile_bank%d.asm", tileBank))
+		defer bankFile.Close()
+		bankFile.WriteString(fmt.Sprintf("; Tile Bank %d\n", tileBank))
+		bankFile.WriteString(fmt.Sprintf(".segment \"PRGA%X\"\n", tileBank+8))
+
+		// skip the first 8 bytes
+		for byteIndex := offsets[tileBank]; byteIndex + 16 < len(banks[tileBank]); byteIndex += 16 {
+			bankFile.WriteString(
+				fmt.Sprintf(
+					".byte $%02X, $%02X, $%02X, $%02X, $%02X, $%02X, $%02X, $%02X, $%02X,"+
+						" $%02X, $%02X, $%02X, $%02X, $%02X, $%02X, $%02X\n",
+					banks[tileBank][byteIndex],
+					banks[tileBank][byteIndex+8],
+					banks[tileBank][byteIndex+1],
+					banks[tileBank][byteIndex+1+8],
+					banks[tileBank][byteIndex+2],
+					banks[tileBank][byteIndex+2+8],
+					banks[tileBank][byteIndex+3],
+					banks[tileBank][byteIndex+3+8],
+					banks[tileBank][byteIndex+4],
+					banks[tileBank][byteIndex+4+8],
+					banks[tileBank][byteIndex+5],
+					banks[tileBank][byteIndex+5+8],
+					banks[tileBank][byteIndex+6],
+					banks[tileBank][byteIndex+6+8],
+					banks[tileBank][byteIndex+7],
+					banks[tileBank][byteIndex+7+8],
+				),
+			)		
+			bankFile.WriteString(".byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00\n")
+		}
+		bankFile.WriteString(".byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF\n")
+		bankFile.WriteString(".byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00\n")
+	}
+
 	var byteOffset = 0x8000
 	for i := 0; i < 8; i++ {
 		if i == 7 {

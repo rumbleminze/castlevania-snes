@@ -155,4 +155,42 @@ WriteAPUControl:
     sta APUBase + $15
     rts
 
+bank_switch_rewrite:
+  LDA NMITIMEN_STATE
+  AND #$7F
+  STA NMITIMEN  
+
+  TYA
+  INC
+  ORA #$A0
+  STA BANK_SWITCH_DB
+  PHA
+
+  LDA #<bank_switch_jump
+  STA BANK_SWITCH_LB
+  LDA #>bank_switch_jump
+  STA BANK_SWITCH_HB
+  JML (BANK_SWITCH_LB)
+bank_switch_jump:
+  PLB
+  TYA
+  jslb reset_nmi_status, $a0
+  RTS
+
+set_ppu_mask:
+  jslb set_ppu_mask_to_accumulator, $a0
+  RTS
+
+set_ppu_control:
+  jslb update_ppu_control_from_a, $a0
+  RTS
+
+c0c0_rewrite:
+  LDA PPU_MASK_STATE
+  LDX $1F
+  BEQ :+
+  LDA #$00
+: jslb set_ppu_mask_to_accumulator_without_store, $a0
+  rts
+
 routines_end:

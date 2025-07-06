@@ -4,7 +4,7 @@
 .define OLD_2A03 1 ; 0 = use updated vers, 1 = use original
 
 ; constants
-LINE_TO_START_HUD = 199
+LINE_TO_START_HUD = 47
 NUM_SCANLINES = 240 ; overscan on
 
 ; These values are almost always used by NES game, but the values will be different
@@ -12,27 +12,21 @@ NUM_SCANLINES = 240 ; overscan on
 HOFS_LB             = $FD   ; BG H Scroll position [x] updated
 VOFS_LB             = $FC   ; BG V Scroll position [x] updated
 
-PPU_CONTROL_STATE   = $FF ;updated  ; Current state of the PPU Control register
-PPU_MASK_STATE      = $FE ;needs updating  ; Current state of the PPU Mask register
-ACTIVE_NES_BANK     = $08AE   ; Current bank loaded into the 8000-BFFF bank (for UNROM and MMC1)
+PPU_CONTROL_STATE   = $FF   ; Current state of the PPU Control register [x] updated
+PPU_MASK_STATE      = $FE   ;needs updating  ; Current state of the PPU Mask register
+ACTIVE_NES_BANK     = $24   ; Current bank loaded into the 8000-BFFF bank (for UNROM and MMC1)
+PREV_NES_BANK       = $27
 
 CURRENT_SPRITE_BANK = $D5
 CURRENT_BG_BANK     = $D6
 
 ; NES RAM MAP Values
-P1_HEALTH = $041E
-P2_HEALTH = $041F
-ENEMY_1_HEALTH = $0420
-ENEMY_2_HEALTH = $0421
-CURR_AREA = $0422
-P1_LIVES = $0432
-P2_LIVES = $0433
-NUM_PLAYERS = $0434 ; 00 for 1 player, 01 for 2 players
-DIFFICULTY = $0435  ; 00 - 02
-; max level per difficulty
-; A794E4 - A794E6
-; Health to refill when loading level?
-; a7959B - a7959d
+; 00 = Booting; 01 = Title Screen; 02 = Demo Mode; 03 = Start Game;
+; 04 = Introduction; 05 = Gameplay; 06 = Respawning; 07 = Game Over;
+; 08 = Door Transition; 09 = Autowalk; 0a = Entering Castle; 0b = Autoclimb;
+; 0c = Scoring & Map; 0d = Continue; 0e = Falling; 0f = Ending
+SYSTEM_STATE = $18
+
 
 ; SNES Register Value storage
 ; since SNES Registers don't line up with NES registers 1:1

@@ -174,6 +174,10 @@ set_ppu_control_and_mask_to_0:
     AND #$7F
     STA NMITIMEN
 
+    LDA INIDISP_STATE
+    ORA #$80
+    STA INIDISP
+
     RTL
 
 update_ppu_control_from_a:
@@ -205,8 +209,40 @@ update_ppu_control_from_a:
     jslb set_vram_increment_to_32_no_store, $a0
     bra :++
 :   jslb set_vram_increment_to_1, $a0
+:   bra update_offs_values  
 
-:   STZ HOFS_HB
+update_ppu_control_from_a_store:
+    ; we only care about a few values for ppu control
+    ; these bits Nxxx xIAA
+    ; N = NMI enabled
+    ; I = Increment mode 0 = H, 1 = V
+    ; AA = Base Nametable
+    ;   this controls which quadrant of the TileMap the NES shows
+    ;   for us this controls what the HB of the the H/V Offset should be
+    ; 00 = 2000 = 0 H 0 V
+    ; 01 = 2400 = 1 H 0 V
+    ; 10 = 2800 = 0 H 1 V
+    ; 11 = 2C00 = 1 H 1 V
+    STA curr_ppu_ctrl_value
+    PHA
+    AND #$80
+    CMP #$80
+    BNE :+
+    jslb enable_nmi_and_store, $a0
+    bra :++
+:   jslb disable_nmi_and_store, $a0
+
+:   PLA
+    PHA
+    AND #$04
+    CMP #$04
+    BNE :+
+    jslb set_vram_increment_to_32_and_store, $a0
+    bra update_offs_values
+:   jslb set_vram_increment_to_1_and_store, $a0
+
+update_offs_values:
+    STZ HOFS_HB
     STZ VOFS_HB
     PLA
     pha
@@ -246,7 +282,8 @@ ret_from_update_ppu_control_from_a:
 
 update_ppu_control_from_a_and_store:
     STA PPU_CONTROL_STATE
-    jslb update_ppu_control_from_a, $a0
+    jslb update_ppu_control_from_a_store, $a0
+
     rtl
 
 set_ppu_control_to_0_and_store:
@@ -405,13 +442,13 @@ enable_nmi_and_store:
     STA PPU_CONTROL_STATE
 
     ; not sure on this
-    LDA PPU_MASK_STATE
-    BEQ :+
-    LDA INIDISP_STATE
-    AND #$7F
-    STA INIDISP
-    STA INIDISP_STATE
-    :
+    ; LDA PPU_MASK_STATE
+    ; BEQ :+
+    ; LDA INIDISP_STATE
+    ; AND #$7F
+    ; STA INIDISP
+    ; STA INIDISP_STATE
+    ; :
     RTL
 
 enable_nmi:

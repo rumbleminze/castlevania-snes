@@ -32,14 +32,18 @@ nmi:
     PHA
     PLB
 
-    ; LifeForce NMI is at E76B
-    LDA #$E7
+    ; Castlevania NMI is at C052
+    LDA #$c0
     STA BANK_SWITCH_HB
-    LDA #$6B
+    LDA #$52
     STA BANK_SWITCH_LB
     PLY
     PLX
     PLA
+    ; eat one more stack variable
+    XBA
+    PLA
+    XBA
     JML [BANK_SWITCH_LB]
 
 return_from_nes_nmi:
