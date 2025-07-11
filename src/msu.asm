@@ -3,7 +3,7 @@
 ; Audio Tracks for <game>
 ; NES value - track
 
-.DEFINE NUM_TRACKS        $14
+.DEFINE NUM_TRACKS        $0F
 
 ; Read Flags
 .DEFINE MSU_STATUS      $2000
@@ -20,24 +20,7 @@
 .DEFINE NSF_STOP        #$00
 .DEFINE NSF_PAUSE       #$FF ; 
 .DEFINE NSF_RESUME      #$FF ; 
-.DEFINE NSF_MUTE        #$00
-
-; this duplicates the logic that we normally execute when
-; 0 is set as the song to play.
-; this logic is an example, and would be different per game
-double_dragon_2_mute_nsf_copy:
-  LDA #$8D
-  STA $07F0
-  LDA #$40
-  STA $07F2
-  LDA #$60
-  STA $07F3
-
-  LDA MSU_PLAYING
-  ORA $07FE
-  STA $07FE
-
-  RTL
+.DEFINE NSF_MUTE        #$55
 
 fade_if_needed:
   LDA MSU_FADE_IN_PROGRESS
@@ -478,24 +461,30 @@ decrement_timer_if_needed:
 ; this 0x100 byte lookup table maps the NSF track to the MSU-1 track
 ; MSU Index - NES value - track
 ; 
-;  1 - 25 - Level 1
-;  2 - 28 - Level 2
-;  3 - 2B - Level 3
-;  4 - 2E - Level 4
-;  5 - 31 - Level 5
-;  6 - 37 - Level 6
-;  7 - 3A - Boss
-;  8 - 3D - Death
-;  9 - 40 - Ending
-; 10 - 22 - Level 5 Mini Boss
-; 11 - 34 - Level 5b
-
+; 00 - 27 - Prologue
+; 01 - 2A - Vampire Killier (Stage 1)
+; 02 - 2D - Stalker (Stage 2 & 4-2)
+; 03 - 30 - Wicked Child (Stage 3)
+; 04 - 39 - Walking the Edge (Stage 4)
+; 05 - 36 - Heart of Fire (Stage 5)
+; 06 - 33 - Out of Time (Stage 6)
+; 07 - 3C - Nothing to Lose (Stage 7)
+; 08 - 3F (but how?) - Poison Mind (Boss)
+; 09 - 42 - Black Night (Last Boss)
+; 0A - 4B - All Clear (no looping)
+; 0B - 45 - Voyager (Ending)
+; 0C - 48 - Stage Clear (no looping)
+; 0D - 51 - Game Over (no looping)
+; 0E - 4E - Lose Life (no looping)
+; 0F - ?? - Underground (menu theme)
+; 
+; other soundtracks are 0x[12345]_
 msu_track_lookup:
 .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $0A, $FF, $FF, $01, $FF, $FF, $02, $FF, $FF, $03, $FF, $FF, $04, $FF
-.byte $FF, $05, $FF, $FF, $0B, $FF, $FF, $06, $FF, $FF, $07, $FF, $FF, $08, $FF, $FF
-.byte $09, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $00, $FF, $FF, $01, $FF, $FF, $02, $FF, $FF
+.byte $03, $FF, $FF, $06, $FF, $FF, $05, $FF, $FF, $04, $FF, $FF, $07, $FF, $FF, $08
+.byte $FF, $FF, $09, $FF, $FF, $0B, $FF, $FF, $0C, $FF, $FF, $0A, $FF, $FF, $0E, $FF
 .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
@@ -510,12 +499,12 @@ msu_track_lookup:
 
 ; this 0x100 byte lookup table maps the NSF track to the if it loops ($03) or no ($01)
 msu_track_loops:
-.byte $00, $03, $03, $03, $03, $03, $03, $03, $01, $03, $03, $03, $00, $00, $00, $00
-.byte $00, $03, $03, $03, $03, $03, $03, $03, $01, $03, $03, $03, $00, $00, $00, $00
-.byte $00, $03, $03, $03, $03, $03, $03, $03, $01, $03, $03, $03, $00, $00, $00, $00
-.byte $00, $03, $03, $03, $03, $03, $03, $03, $01, $03, $03, $03, $00, $00, $00, $00
-.byte $00, $03, $03, $03, $03, $03, $03, $03, $01, $03, $03, $03, $00, $00, $00, $00
-.byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
+.byte $01, $03, $03, $03, $03, $03, $03, $03, $01, $03, $01, $01, $01, $01, $01, $01
+.byte $01, $03, $03, $03, $03, $03, $03, $03, $01, $03, $01, $01, $01, $01, $01, $01
+.byte $01, $03, $03, $03, $03, $03, $03, $03, $01, $03, $01, $01, $01, $01, $01, $01
+.byte $01, $03, $03, $03, $03, $03, $03, $03, $01, $03, $01, $01, $01, $01, $01, $01
+.byte $01, $03, $03, $03, $03, $03, $03, $03, $01, $03, $01, $01, $01, $01, $01, $01
+.byte $01, $03, $03, $03, $03, $03, $03, $03, $01, $03, $01, $01, $01, $01, $01, $01
 .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
@@ -529,14 +518,15 @@ msu_track_loops:
 
 ; this 0x100 byte lookup table maps the NSF track to the MSU-1 volume ($FF is max, $4F is half)
 msu_track_volume:
-.byte $4F, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $4F, $4F, $4F, $4F
-.byte $4F, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $4F, $4F, $4F, $4F
-.byte $4F, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $4F, $4F, $4F, $4F
-.byte $4F, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $4F, $4F, $4F, $4F
-.byte $4F, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $4F, $4F, $4F, $4F
-.byte $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F
-.byte $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F
-.byte $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F
+.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+
 .byte $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F
 .byte $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F
 .byte $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F

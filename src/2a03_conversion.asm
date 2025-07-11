@@ -135,6 +135,10 @@ SnesUpdateAudio:
     LDA #$0F
     STA $A15
 
+    stz $0A10
+    stz $0A11
+    stz $0A12
+    stz $0A13
     stz $0A16
 
 End:

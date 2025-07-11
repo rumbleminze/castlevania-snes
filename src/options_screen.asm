@@ -76,6 +76,10 @@ show_options_screen:
     DEX
     BPL :-
 
+    LDA MSU_AVAILABLE
+    BNE :+
+        jsr decrement_msu1
+    :
 
     STZ CURR_OPTION
 
@@ -365,7 +369,17 @@ option_0_side_effects:
     rts
 
 
-option_3_side_effects:
+option_2_side_effects:
+    ; prevent turning on msu if it's unavailable
+    LDA MSU_AVAILABLE
+    BNE :++
+        LDA OPTIONS_MSU_SELECTED
+        BNE :+
+            jsr decrement_msu1
+        :
+        rts
+    :
+
     LDA OPTIONS_MSU_SELECTED
     EOR #$01
     STA MSU_SELECTED
@@ -387,12 +401,12 @@ option_4_side_effects:
     LDA RDNMI
     : LDA RDNMI
     BPL :-
-    LDA #$25
+    LDA #$27
     jslb msu_check, $B2
     rts
 
 option_1_side_effects:
-option_2_side_effects: 
+option_3_side_effects: 
 option_5_side_effects:
 option_6_side_effects:
 option_7_side_effects:

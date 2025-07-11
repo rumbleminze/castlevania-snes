@@ -60,6 +60,10 @@ setup_hdma:
   ; x3
   ; 00
   ; set up 47 lines of hud
+  LDA $18
+  CMP #$0E
+  BEQ falling
+
   LDA #47
   STA SCROLL_HDMA_START
   STZ SCROLL_HDMA_START + 1
@@ -84,7 +88,7 @@ setup_hdma:
 
   rtl
 
-
+falling:
   LDX curr_voff_low
   LDA $A0A080,X
   STA SCROLL_HDMA_START + 0
@@ -122,129 +126,10 @@ setup_hdma:
   STA SCROLL_HDMA_START + 9
   STA SCROLL_HDMA_START + 14
 
- 
-  LDY #$0A
-  LDA SCROLL_HDMA_START
-  STA LINES_COMPLETE
-
-
-  LDA SCROLL_HDMA_START + 5
-  CLC
-  ADC LINES_COMPLETE
-  STA LINES_COMPLETE
-  SEC
-  SBC #LINE_TO_START_HUD
-
-  BMI :+
-    ; hit the end on 2nd one, back it up
-    STA LINES_COMPLETE
-    LDA SCROLL_HDMA_START + 5
-    SEC
-    SBC LINES_COMPLETE
-    STA SCROLL_HDMA_START + 5
-    BRA write_hud_values
-  :
-
-  LDY #$0F
-  LDA SCROLL_HDMA_START + 10
-  CLC
-  ADC LINES_COMPLETE
-  STA LINES_COMPLETE
-  SEC
-  SBC #LINE_TO_START_HUD
-  BMI :+
-    ; hit the end on the 3rd one, back it up
-    STA LINES_COMPLETE
-    LDA SCROLL_HDMA_START + 10
-    SEC
-    SBC LINES_COMPLETE
-    STA SCROLL_HDMA_START + 10
-    BRA write_hud_values
-  :
-    ; didn't get to enough lines, we actually have to bump up the last one
-    LDA #LINE_TO_START_HUD
-    SBC LINES_COMPLETE
-    ADC SCROLL_HDMA_START + 10
-    STA SCROLL_HDMA_START + 10
-
-write_hud_values:
-  ; 1 line (last write)
-  ;   HOFS_LB (always 0), HOFS_HB, VOFS_LB, VOFS_LB
-
-
-
-  LDA $40 ; 00 = Horizontal LVL, 01 = Vertical
-  Beq :+
-    ; 8 pixels of empty tiles
-    LDA #08
-    STA SCROLL_HDMA_START, Y
-    
-    INY 
-    LDA #$00
-    STA SCROLL_HDMA_START, Y  
-    
-    INY
-    LDA #$01
-    STA SCROLL_HDMA_START, Y
-
-    INY
-    LDA #$3C
-    STA SCROLL_HDMA_START, Y
-
-    INY
-    LDA #$00
-    STA SCROLL_HDMA_START, Y
-
-    ; now hud    
-    LDA #01
-    STA SCROLL_HDMA_START, Y
-    
-    INY 
-    LDA #$00
-    STA SCROLL_HDMA_START, Y  
-    
-    INY
-    LDA #$01
-    STA SCROLL_HDMA_START, Y
-    INY 
-    LDA #$30
-    STA SCROLL_HDMA_START, Y  
-    INY 
-    LDA #$00
-    STA SCROLL_HDMA_START, Y  
-
-    BRA :++
-  : 
-    ; for horizontal levels. some of them need to be adjusted
-    ; because for some god-forsaken reason
-    ; they moved the hud around by 8 pixels.
-
-    LDA #01
-    STA SCROLL_HDMA_START, Y
-    
-    INY 
-    LDA #$00
-    STA SCROLL_HDMA_START, Y  
-    
-    INY
-    LDA #$01
-    STA SCROLL_HDMA_START, Y
-    INY 
-    LDA #$38
-    STA SCROLL_HDMA_START, Y  
-    INY 
-    LDA #$00
-    STA SCROLL_HDMA_START, Y  
-    
-  :
-
-
-
-end_hdma:
+ end_hdma:
   ; end hdma byte
   LDA #$00
-  INY
-  STA SCROLL_HDMA_START, Y
+  STA SCROLL_HDMA_START+15
 
 
   RTL

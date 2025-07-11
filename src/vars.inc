@@ -1,7 +1,7 @@
 ; useful build modifications to build with or without things present in the rom
 .define DEBUG_MOD 1
 .define ENABLE_MSU 0
-.define OLD_2A03 1 ; 0 = use updated vers, 1 = use original
+.define OLD_2A03 0 ; 0 = use updated vers, 1 = use original
 
 ; constants
 LINE_TO_START_HUD = 47
@@ -63,8 +63,8 @@ OPTIONS_START_ADDR   = $0860
 ; which options are stored at which address
 OPTIONS_PALETTE         = OPTIONS_START_ADDR
 OPTIONS_LIVES           = OPTIONS_START_ADDR + 1
-OPTIONS_STARTING_LEVEL  = OPTIONS_START_ADDR + 2
-OPTIONS_MSU_SELECTED     = OPTIONS_START_ADDR + 3
+OPTIONS_STARTING_LEVEL  = OPTIONS_START_ADDR + 3
+OPTIONS_MSU_SELECTED     = OPTIONS_START_ADDR + 2
 OPTIONS_MSU_PLAYLIST    = OPTIONS_START_ADDR + 4
 OPTIONS_DIFFICULTY    = OPTIONS_START_ADDR + 5
 

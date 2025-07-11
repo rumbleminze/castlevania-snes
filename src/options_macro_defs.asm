@@ -16,7 +16,7 @@ toggle_current_option:
 :
     CMP #2
     BNE :+
-    JMP increment_level
+    JMP increment_msu1
 :
 RTS
 
@@ -36,14 +36,14 @@ decrement_current_option:
 :
     CMP #2
     BNE :+
-    JMP decrement_level
+    JMP decrement_msu1
 :
 RTS
 
 initialize_options:
    jsr update_palette
    jsr update_lives
-   jsr update_level
+   jsr update_msu1
     rts
 
 option_palette_choice_tiles:
@@ -164,34 +164,30 @@ update_lives:
 	jsr option_1_side_effects
 	rts
 
-option_level_choice_tiles:
-.byte $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $11, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34
-.byte $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $12, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34
-.byte $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $13, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34
-.byte $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $14, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34
-.byte $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $15, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34
-.byte $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $16, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34
+option_msu1_choice_tiles:
+.byte $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $28, $18, $27, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34
+.byte $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $28, $18, $1F, $18, $1F, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34
 
-decrement_level:
+decrement_msu1:
 	dec $0862
 	BPL :+
-		LDA #6
+		LDA #2
 		DEC A
 		STA $0862
 	:
-	BRA update_level
+	BRA update_msu1
 
-increment_level:
+increment_msu1:
 	inc $0862
 	lda $0862
- 	CMP #6
+ 	CMP #2
 	BNE :+	
 		LDA #$00
 	:
 	STA $0862
-	BRA update_level
+	BRA update_msu1
 
-update_level:
+update_msu1:
 	LDA RDNMI
 :	LDA RDNMI
 	BPL :-
@@ -210,9 +206,9 @@ update_level:
 	STA VMADDL
 
 	LDX #$00
-:	LDA option_level_choice_tiles, Y
+:	LDA option_msu1_choice_tiles, Y
 	STA VMDATAH
-	LDA option_level_choice_tiles + 1, Y
+	LDA option_msu1_choice_tiles + 1, Y
 	STA VMDATAL
 	INX
 	INY

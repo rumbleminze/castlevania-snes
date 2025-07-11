@@ -155,9 +155,35 @@
 .byte $00, $07, $A2, $02, $A0, $06, $48, $8A, $84, $01, $18, $E5, $01, $AA, $68, $A0
 .byte $00, $84, $00, $91, $00, $88, $D0, $FB, $C6, $01, $E8, $D0, $F6, $60, $A2, $B0
 .byte $A9, $00, $9D, $00, $01, $CA, $E0, $30, $B0, $F8, $60, $A2, $00, $A9, $00, $95
-.byte $00, $E8, $E0, $F0, $90, $F9, $60, $48, $A5, $7F, $D0, $21, $68, $8D, $F6, $07
-.byte $8C, $F5, $07, $A9, $01, $85, $7F, $A0, $00, $20, $D8, $C1, $AD, $F6, $07, $20
-.byte $87, $81, $20, $CF, $C1, $AC, $F5, $07, $A9, $00, $85, $7F, $60, $68, $60
+.byte $00, $E8, $E0, $F0, $90, $F9, $60
+
+
+; play sound routine
+  PHA  
+  LDA $7F
+  BNE @ignore_sfx
+  PLA
+
+  jsr sound_hijack
+  RTS
+  nops 12
+  nops 16
+;   STA $07F6
+;   STY $07F5
+;   LDA #$01
+;   STA $7F
+;   LDY #$00
+;   JSR $C1D8
+;   LDA $07F6
+;   JSR $8187
+;   JSR $C1CF
+;   LDY $07F5
+;   LDA #$00
+;   STA $7F
+;   RTS
+@ignore_sfx:
+  PLA
+  RTS
 
 ; various ways to bank switch
   LDY PREV_NES_BANK
@@ -323,7 +349,16 @@
 .byte $00, $85, $FD, $85, $FC, $85, $F4, $20, $23, $FD, $20, $8C, $AE, $A9, $1E, $85
 .byte $FE, $A5, $FF, $29, $FE, $85, $FF, $20, $FC, $B9, $4C, $71, $C3, $A2, $00, $86
 .byte $25, $E8, $86, $26, $60, $60, $20, $38, $CA, $A2, $04, $A9, $00, $9D, $FC, $07
-.byte $CA, $10, $FA, $A9, $BF, $25, $1C, $85, $1C, $A9, $04, $85, $2A, $A9, $03, $85
+.byte $CA, $10, $FA, $A9, $BF, $25, $1C, $85, $1C
+
+; set lives
+;   LDA #$04
+;   STA $2A
+  jsr set_starting_lives
+  nop
+
+
+.byte $A9, $03, $85
 .byte $2C, $A9, $00, $85, $FD, $85, $FC, $20, $EA, $C9, $A9, $40, $85, $44, $85, $45
 .byte $A2, $05, $86, $71, $A9, $00, $85, $5B, $A9, $00, $85, $7D, $85, $3B, $85, $48
 .byte $85, $2D, $8D, $6C, $04, $85, $3D, $85, $47, $85, $3E, $E6, $3E, $A9, $04, $85
@@ -1276,7 +1311,8 @@ jsr set_ppu_control ; STA PpuControl_2000
 ; Sprite 0 hit checks
 ; we actually don't care about ANY of this, because we'll handle it with HDMA
   LDX #$00
-  BRA :+++++
+  BRA @SKIPALLTHIS
+
 : INX
   ; reclaimed to above BEQ :+
   LDA RDNMI ; PpuStatus_2002
@@ -1296,7 +1332,7 @@ jsr set_ppu_control ; STA PpuControl_2000
   LDY #$2C
 : DEY
   BNE :-
-:
+@SKIPALLTHIS:
   LDA RDNMI ; PpuStatus_2002
 
   LDA $2E
@@ -1467,9 +1503,28 @@ nops 47
 .byte $0C, $03, $88, $8E, $00, $0D, $00, $01, $02, $08, $B7, $00, $0A, $00, $03, $02
 .byte $88, $B4, $80, $07, $80, $02, $FF, $03, $88, $9A, $80, $07, $80, $11, $FF, $01
 .byte $08, $AD, $00, $0E, $00, $0B, $FF, $02, $08, $80, $00, $10, $00, $10, $01, $08
-.byte $90, $00, $00, $00, $0E, $FF, $A9, $0F, $8D, $15, $40, $A2, $0F, $A0, $FD, $A9
-.byte $0B, $4C, $A4, $FE, $8E, $10, $40, $8C, $12, $40, $8D, $13, $40, $A9, $1F, $8D
-.byte $15, $40, $60, $AD, $FB, $07, $D0, $45, $AD, $F8, $07, $D0, $2F, $E6, $F1, $D0
+.byte $90, $00, $00, $00, $0E, $FF
+
+; DMC sfx!
+  LDA #$0F
+  jsr WriteAPUControl ; STA ApuStatus_4015
+  LDX #$0F
+  LDY #$FD
+  LDA #$0B
+  JMP $FEA4
+  ; current 2A03 emulator doesn't deal with these
+  ; we'll need to do some brr samples!
+  nops 9 
+;   STX DmcFreq_4010
+;   STY DmcAddress_4012
+;   STA DmcLength_4013
+
+  LDA #$1F
+  jsr WriteAPUControl ; STA ApuStatus_4015
+  RTS
+
+ 
+.byte $AD, $FB, $07, $D0, $45, $AD, $F8, $07, $D0, $2F, $E6, $F1, $D0
 .byte $02, $E6, $F2, $A0, $05, $20, $D6, $C1, $A0, $00, $B1, $F1, $C9, $FF, $F0, $29
 .byte $8D, $F8, $07, $E6, $F1, $D0, $02, $E6, $F2, $B1, $F1, $8D, $F9, $07, $E6, $F1
 .byte $D0, $02, $E6, $F2, $B1, $F1, $8D, $FA, $07, $20, $D4, $C1, $CE, $F8, $07, $AD

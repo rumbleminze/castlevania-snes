@@ -14,10 +14,11 @@ mkdir -p out
 ca65 ./src/main.asm -o ./out/main.o -g
 ld65 -C ./src/hirom.cfg -o ./out/$GAME.sfc ./out/main.o
 # Copy the bytes from a specific section of the output file and save them as another file
-dd if=./out/$GAME.sfc of=./src/wram_routines_v0.bin bs=1 skip=$((0x001C00)) count=$((0x300))
+dd if=./out/$GAME.sfc of=./src/wram_routines.bin bs=1 skip=$((0x001800)) count=$((0x800))
 # rebuild the file now with the updated wram routines
 ca65 ./src/main.asm -o ./out/main.o -g
 ld65 -C ./src/hirom.cfg -o ./out/$GAME.sfc ./out/main.o
 
+timestamp=`date '+%Y%m%d%H%M%S'`
 cp ./out/$GAME.sfc ./out/buildarchive/$GAME-$timestamp.sfc
 

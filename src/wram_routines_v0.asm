@@ -99,8 +99,8 @@ WriteAPUSq1Ctrl2:
     sta APUBase+$06
     rts
 
-WriteAPUSq1Ctrl2_X:
-    stx APUBase+$06
+WriteAPUSq1Ctrl2_Y:
+    sty APUBase+$06
     rts
 
 WriteAPUSq1Ctrl3:

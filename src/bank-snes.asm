@@ -165,7 +165,7 @@ initialize_registers:
   STA MEMSEL
 ; Use #$04 to enable overscan if we can.
   LDA #$04
-  LDA #$00
+  ; LDA #$00
   STA SETINI
 
 
@@ -182,7 +182,7 @@ initialize_registers:
   ; LDA #$01 ; uncomment this to use auto-poll joypad
   STA NMITIMEN_STATE
   
-  ; jsl spc_init_dpcm
+  jsl spc_init_dpcm
   jsl spc_init_driver
   jsr write_sound_wram_routines
   STZ MSU_SELECTED
@@ -228,7 +228,7 @@ intro_done:
   snes_nmi:
     LDA RDNMI 
 
-    ; jsr make_the_game_easier
+    jsr make_the_game_easier
     ; jslb update_values_for_ppu_mask, $a0
     jslb infidelitys_scroll_handling, $a0
     jslb setup_hdma, $a0
@@ -512,12 +512,8 @@ wait_for_vblank:
 
 make_the_game_easier:
 
-  LDA #$02
-  STA $76
-  LDA #99
-  STA $34
-  LDA #$02
-  STA $86
+  LDA #$40
+  STA $45
 
 
   rts 
@@ -561,12 +557,20 @@ write_sound_wram_routines:
 LDY #$00
 :
 LDA wram_routines, Y
-STA $1C00, Y
+STA $1800, Y
 LDA wram_routines + $100, Y
-STA $1D00, Y
+STA $1900, Y
 LDA wram_routines + $200, Y
-STA $1E00, Y
+STA $1A00, Y
 LDA wram_routines + $300, Y
+STA $1B00, Y
+LDA wram_routines + $400, Y
+STA $1C00, Y
+LDA wram_routines + $500, Y
+STA $1D00, Y
+LDA wram_routines + $600, Y
+STA $1E00, Y
+LDA wram_routines + $700, Y
 STA $1F00, Y
 
 INY
@@ -574,11 +578,7 @@ BNE :-
 RTS
 
 wram_routines:
-.if OLD_2A03 = 0
   .incbin "wram_routines.bin"
-.else
-  .incbin "wram_routines_v0.bin"
-.endif
 
 ; .segment "PRGA0C"
 ; fixeda0:

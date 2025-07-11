@@ -341,6 +341,28 @@ WriteAPUNoiseCtrl3:
     plx
     rts
 
+WriteAPUDMCCounter:
+    stx DmcCounter_4011
+rts
+
+WriteAPUDMCFreq:
+    sta DmcFreq_4010
+rts
+
+WriteAPUDMCAddr:
+    sta DmcAddress_4012
+rts
+
+WriteAPUDMCLength:
+    sta DmcLength_4013
+rts
+
+WriteAPUDMCPlay:
+    sta ApuStatus_4015
+    and #%00010000
+    sta APUExtraControl
+rts
+
 WriteAPUControl:
     sta APUIOTemp
     xba
@@ -396,5 +418,122 @@ Sound__EmulateLengthCounter_length_d3_mixed:
 .byte $25,$25,$25,$25,$25,$25,$25,$25,$0E,$0E,$0E,$0E,$0E,$0E,$0E,$0E
 .byte $09,$09,$09,$09,$09,$09,$09,$09,$0F,$0F,$0F,$0F,$0F,$0F,$0F,$0F
 .byte $11,$11,$11,$11,$11,$11,$11,$11,$10,$10,$10,$10,$10,$10,$10,$10
+
+play_queued_track:
+  LDA #$00
+  STA $E2
+  LDA $60
+
+  jslb play_track_hijack, $b2
+  rts
+
+
+
+bank_switch_rewrite:
+  LDA NMITIMEN_STATE
+  AND #$7F
+  STA NMITIMEN  
+
+  TYA
+  INC
+  ORA #$A0
+  STA BANK_SWITCH_DB
+  PHA
+
+  LDA #<bank_switch_jump
+  STA BANK_SWITCH_LB
+  LDA #>bank_switch_jump
+  STA BANK_SWITCH_HB
+  JML (BANK_SWITCH_LB)
+bank_switch_jump:
+  PLB
+  TYA
+  jslb reset_nmi_status, $a0
+  RTS
+
+set_ppu_mask:
+  jslb set_ppu_mask_to_accumulator, $a0
+  RTS
+
+set_ppu_control:
+  jslb update_ppu_control_from_a, $a0
+  RTS
+
+c0c0_rewrite:
+  LDA PPU_MASK_STATE
+  LDX $1F
+  BEQ :+
+  LDA #$00
+: jslb set_ppu_mask_to_accumulator_without_store, $a0
+  rts
+
+.define BRR_PLAYING $FF
+sound_hijack:
+  JSR check_for_brr
+  CMP #BRR_PLAYING
+  ; if brr is playing pretend sfx are muted and just rts
+  BNE :+
+    LDA #$00
+    RTS    
+: ; handle as normal
+  
+  jslb play_track_hijack, $b2
+
+  STA $07F6
+  STY $07F5
+  LDA #$01
+  STA $7F
+  LDY #$00
+  JSR $C1D8
+  LDA $07F6
+  JSR $8187
+  JSR $C1CF
+  LDY $07F5
+  LDA #$00
+  STA $7F
+  RTS
+
+
+check_for_brr:
+  CMP #$16
+  BEQ :+
+  CMP #$17
+  BEQ :+
+  CMP #$18
+  BEQ :+
+  CMP #$19
+  BEQ :+
+  CMP #$23
+  BEQ :+
+  CMP #$1d
+  BEQ :+
+  BRA :++
+
+    ; we found our BRR!  YAY
+ :  
+    STA DmcAddress_4012
+    
+    LDA #$08
+    STA DmcCounter_4011
+    LDA #$08
+    STA DmcFreq_4010
+    LDA #$10
+    ORA APUExtraControl
+    STA APUExtraControl
+    LDA #BRR_PLAYING 
+  :
+  RTS
+
+lives_options:
+.byte 03, 10, 30, 99
+
+set_starting_lives:
+  PHY
+  LDY OPTIONS_LIVES
+  LDA lives_options, Y
+  STA $2A
+  PLY
+  RTS
+
 
 routines_end:
