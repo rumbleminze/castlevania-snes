@@ -1,4 +1,4 @@
-NUM_OPTIONS = 3
+NUM_OPTIONS = 4
 
 
 ; Toggle current option
@@ -12,11 +12,15 @@ toggle_current_option:
 :
     CMP #1
     BNE :+
-    JMP increment_lives
+    JMP increment_dificulty
 :
     CMP #2
     BNE :+
     JMP increment_msu1
+:
+    CMP #3
+    BNE :+
+    JMP increment_playlist
 :
 RTS
 
@@ -32,18 +36,23 @@ decrement_current_option:
 :
     CMP #1
     BNE :+
-    JMP decrement_lives
+    JMP decrement_dificulty
 :
     CMP #2
     BNE :+
     JMP decrement_msu1
 :
+    CMP #3
+    BNE :+
+    JMP decrement_playlist
+:
 RTS
 
 initialize_options:
    jsr update_palette
-   jsr update_lives
+   jsr update_dificulty
    jsr update_msu1
+   jsr update_playlist
     rts
 
 option_palette_choice_tiles:
@@ -107,32 +116,31 @@ update_palette:
 	jsr option_0_side_effects
 	rts
 
-option_lives_choice_tiles:
-.byte $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $13, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34
-.byte $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $11, $18, $10, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34
-.byte $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $13, $18, $10, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34
-.byte $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $19, $18, $19, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34
+option_dificulty_choice_tiles:
+.byte $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $27, $18, $28, $18, $2B, $18, $26, $18, $1A, $18, $25, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34
+.byte $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $21, $18, $1A, $18, $2B, $18, $1D, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34
+.byte $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $1E, $18, $1A, $18, $2C, $18, $32, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34
 
-decrement_lives:
+decrement_dificulty:
 	dec $0861
 	BPL :+
-		LDA #4
+		LDA #3
 		DEC A
 		STA $0861
 	:
-	BRA update_lives
+	BRA update_dificulty
 
-increment_lives:
+increment_dificulty:
 	inc $0861
 	lda $0861
- 	CMP #4
+ 	CMP #3
 	BNE :+	
 		LDA #$00
 	:
 	STA $0861
-	BRA update_lives
+	BRA update_dificulty
 
-update_lives:
+update_dificulty:
 	LDA RDNMI
 :	LDA RDNMI
 	BPL :-
@@ -151,9 +159,9 @@ update_lives:
 	STA VMADDL
 
 	LDX #$00
-:	LDA option_lives_choice_tiles, Y
+:	LDA option_dificulty_choice_tiles, Y
 	STA VMDATAH
-	LDA option_lives_choice_tiles + 1, Y
+	LDA option_dificulty_choice_tiles + 1, Y
 	STA VMDATAL
 	INX
 	INY
@@ -219,6 +227,64 @@ update_msu1:
 	jsr option_2_side_effects
 	rts
 
+option_playlist_choice_tiles:
+.byte $18, $34, $18, $34, $18, $34, $18, $29, $18, $25, $18, $1A, $18, $32, $18, $25, $18, $22, $18, $2C, $18, $2D, $18, $34, $18, $11, $18, $34, $18, $34, $18, $34
+.byte $18, $34, $18, $34, $18, $34, $18, $29, $18, $25, $18, $1A, $18, $32, $18, $25, $18, $22, $18, $2C, $18, $2D, $18, $34, $18, $12, $18, $34, $18, $34, $18, $34
+.byte $18, $34, $18, $34, $18, $34, $18, $29, $18, $25, $18, $1A, $18, $32, $18, $25, $18, $22, $18, $2C, $18, $2D, $18, $34, $18, $13, $18, $34, $18, $34, $18, $34
+.byte $18, $34, $18, $34, $18, $34, $18, $29, $18, $25, $18, $1A, $18, $32, $18, $25, $18, $22, $18, $2C, $18, $2D, $18, $34, $18, $14, $18, $34, $18, $34, $18, $34
+.byte $18, $34, $18, $34, $18, $34, $18, $29, $18, $25, $18, $1A, $18, $32, $18, $25, $18, $22, $18, $2C, $18, $2D, $18, $34, $18, $15, $18, $34, $18, $34, $18, $34
+
+decrement_playlist:
+	dec $0863
+	BPL :+
+		LDA #5
+		DEC A
+		STA $0863
+	:
+	BRA update_playlist
+
+increment_playlist:
+	inc $0863
+	lda $0863
+ 	CMP #5
+	BNE :+	
+		LDA #$00
+	:
+	STA $0863
+	BRA update_playlist
+
+update_playlist:
+	LDA RDNMI
+:	LDA RDNMI
+	BPL :-
+
+	LDA $0863
+	ASL
+	ASL
+	ASL
+	ASL
+	ASL
+	TAY
+	LDA #$20
+	STA VMADDH
+
+	LDA #$CC
+	STA VMADDL
+
+	LDX #$00
+:	LDA option_playlist_choice_tiles, Y
+	STA VMDATAH
+	LDA option_playlist_choice_tiles + 1, Y
+	STA VMDATAL
+	INX
+	INY
+	INY
+	CPX #$10
+	BNE :-
+
+	jsr option_3_side_effects
+	rts
+
 
 
 ; Which Option are we on sprites
@@ -226,6 +292,7 @@ option_sprite_y_pos:
 .byte $17
 .byte $1F
 .byte $27
+.byte $2F
 ; X, Y, Tile, attributes
 options_sprites:
 .byte  $04, $17, $3B, $42   ; Option Selection

@@ -241,11 +241,13 @@ func main() {
 	// I'm leaving the LifeForce here as an example
 	options := []Option{
 		{Index: 0, Name: "PALETTE", Values: []string{"NES", "FCEUX", "GREYSCALE", "NES CLASSIC FBX", "PVM", "REAL", "SMOOTH Y2 FBX", "APPLE II"}},
-		{Index: 1, Name: "LIVES", Values: []string{"3", "10", "30", "99"}},
-		// {Index: 2, Name: "LEVEL", Values: []string{"1", "2", "3", "4", "5", "6", "7"}},		
+		{Index: 1, Name: "DIFICULTY", Values: []string{"NORMAL", "HARD", "EASY"}},
 		{Index: 2, Name: "MSU1", Values: []string{"ON","OFF"}},
-		// {Index: 4, Name: "PLAYLIST", Values: []string{"ROCK AST","VRC6 COVER","SYNTH","ARCADE","X68000"}},
-		// {Index: 5, Name: "DIFFICULTY", Values: []string{"EASY", "NORMAL", "HARD"}},
+		{Index: 3, Name: "PLAYLIST", Values: []string{"PLAYLIST 1","PLAYLIST 2","PLAYLIST 3","PLAYLIST 4","PLAYLIST 5"}},
+		// {Index: 4, Name: "KNOCKBACK", Values: []string{"ON", "OFF"}},
+		// {Index: 5, Name: "HEARTS", Values: []string{"05", "30"}},
+		// {Index: 2, Name: "LEVEL", Values: []string{"1", "2", "3", "4", "5", "6", "7"}},		
+
 	}
 
 	outAsmFile.WriteString(fmt.Sprintf("NUM_OPTIONS = %d\n", len(options)))

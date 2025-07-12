@@ -228,7 +228,8 @@ intro_done:
   snes_nmi:
     LDA RDNMI 
 
-    jsr make_the_game_easier
+    ; jsr make_the_game_easier
+    nops 3
     ; jslb update_values_for_ppu_mask, $a0
     jslb infidelitys_scroll_handling, $a0
     jslb setup_hdma, $a0

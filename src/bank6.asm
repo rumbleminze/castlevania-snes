@@ -435,7 +435,17 @@
 .byte $9A, $AD, $6C, $04, $C9, $04, $D0, $09, $A9, $10, $85, $47, $A9, $30, $85, $5B
 .byte $60, $20, $98, $99, $90, $D7, $20, $62, $9A, $20, $F8, $9A, $A9, $04, $8D, $4C
 .byte $05, $AD, $A5, $9B, $8D, $DC, $04, $AD, $A6, $9B, $8D, $F8, $04, $A9, $00, $8D
-.byte $14, $05, $8D, $88, $04, $A9, $05, $8D, $6C, $04, $A0, $01, $A6, $4E, $BD, $8C
+.byte $14, $05, $8D, $88, $04
+
+; set knockback state
+;   LDA #$05
+;   STA $046C
+  jsr set_knockback_state
+  nops 2
+  LDY #$01
+  LDX $4E
+
+.byte $BD, $8C
 
 
 ; 9700 - bank 6

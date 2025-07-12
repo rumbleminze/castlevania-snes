@@ -525,15 +525,90 @@ check_for_brr:
   RTS
 
 lives_options:
-.byte 03, 10, 30, 99
+.byte $03, $03, $09
 
 set_starting_lives:
   PHY
-  LDY OPTIONS_LIVES
+  LDY OPTIONS_DIFFICULTY
   LDA lives_options, Y
   STA $2A
   PLY
   RTS
 
+set_subweapon_pickup_vars:
+  LDA CURRENT_SUB_WEAPON
+  BEQ :+
+    ; if we're already holding it in the alt don't store it
+    STA OTHER_SUB_WEAPON_HELD    
+  :
+  LDA OPTIONS_DIFFICULTY
+  CMP #DIFFICULTY_EASY
+  BEQ:+
+    ; remove the double/triple if we're not on easy
+    STZ $79
+    STZ $64
+  :
+  RTS
 
+set_subweapon_on_death:
+  LDA OPTIONS_DIFFICULTY
+  CMP #DIFFICULTY_EASY
+  BEQ :+
+  LDA #$00
+  STA $015B
+  STA $64
+: RTS
+
+knockback_states:
+.byte $05, $05, $05
+
+set_knockback_state:
+  LDY OPTIONS_DIFFICULTY
+  LDA knockback_states, Y
+  STA $046C
+  RTS
+
+starting_hearts:
+.byte 5, 5, 30
+
+set_starting_hearts:
+  PHY
+  LDY OPTIONS_DIFFICULTY
+  LDA starting_hearts, Y
+  STA $71
+  PLY
+  RTS
+
+handle_damage:
+  LDA $45
+  BMI :++
+  PHA
+  LDA OPTIONS_DIFFICULTY
+  CMP #DIFFICULTY_EASY
+  BNE :+
+    ;   half the damage
+    LDA $4B
+    LSR
+    STA $4B
+: 
+  PLA
+  SEC
+  SBC $4B
+  STA $45
+
+: RTS
+
+handle_boss_damage:
+  LDA OPTIONS_DIFFICULTY
+  CMP #DIFFICULTY_EASY
+  BNE :+
+    ; double the damage, which is stored in $0D
+    ASL $0D
+  :
+  LDA $01A9
+  SBC $0D
+  BPL :+
+  LDA #$00
+: STA $01A9
+  RTS
 routines_end:
