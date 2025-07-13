@@ -432,16 +432,30 @@
 .byte $9B, $AD, $14, $05, $F0, $0A, $20, $70, $9E, $B0, $06, $20, $70, $AC, $B0, $01
 .byte $60, $A9, $F0, $20, $64, $9A, $A5, $45, $D0, $03, $4C, $E5, $A1, $A9, $30, $85
 .byte $5B, $20, $F8, $9A, $A9, $09, $8D, $6C, $04, $A9, $10, $8D, $4C, $05, $4C, $69
-.byte $9A, $AD, $6C, $04, $C9, $04, $D0, $09, $A9, $10, $85, $47, $A9, $30, $85, $5B
-.byte $60, $20, $98, $99, $90, $D7, $20, $62, $9A, $20, $F8, $9A, $A9, $04, $8D, $4C
+.byte $9A
+
+; stair check for knockback
+; 3 + 2  ops 
+  jsr is_easy
+  BEQ :+
+
+  LDA $046C
+  CMP #$04      ; are we on stairs?
+  BNE :++   ; if not do knockback stuff
+:
+  ; was 8 ops
+  ; 5 used above, leaves use 3 for this jsr
+  jsr set_non_knockback_values
+  RTS
+:
+
+.byte $20, $98, $99, $90, $D7, $20, $62, $9A, $20, $F8, $9A, $A9, $04, $8D, $4C
 .byte $05, $AD, $A5, $9B, $8D, $DC, $04, $AD, $A6, $9B, $8D, $F8, $04, $A9, $00, $8D
 .byte $14, $05, $8D, $88, $04
 
 ; set knockback state
-;   LDA #$05
-;   STA $046C
-  jsr set_knockback_state
-  nops 2
+  LDA #$05
+  STA $046C
   LDY #$01
   LDX $4E
 
@@ -495,7 +509,16 @@
 .byte $3D, $85, $2D, $B0, $02, $E6, $4B, $A5, $2E, $38, $E5, $4B, $85, $2E, $85, $01
 .byte $B0, $02, $C6, $2F, $4C, $38, $99, $A5, $48, $D0, $2C, $A6, $28, $BD, $5E, $FC
 .byte $4A, $4A, $4A, $4A, $C5, $46, $D0, $1F, $BD, $5E, $FC, $29, $0F, $C5, $2F, $D0
-.byte $16, $A5, $2E, $D0, $12, $A9, $3F, $85, $60, $A5, $28, $C9, $12, $F0, $04, $A9
+.byte $16, $A5, $2E, $D0, $12
+
+; queue boss music
+;   LDA #$3F
+;   STA $60
+    jsr queue_boss_music
+    nop
+
+ 
+.byte $A5, $28, $C9, $12, $F0, $04, $A9
 .byte $01, $85, $E2, $A9, $01, $85, $48, $60, $A5, $3F, $38, $E9, $13, $85, $10, $A9
 .byte $00, $85, $11, $A5, $40, $38, $E9, $07, $85, $12, $A5, $41, $85, $13, $B0, $02
 .byte $C6, $13, $20, $A0, $F9, $D0, $37, $A5, $3F, $38, $E9, $13, $85, $10, $A9, $00
@@ -1103,8 +1126,20 @@
 .byte $A5, $FF, $29, $FE, $85, $FF, $A9, $40, $8D, $A9, $01, $20, $69, $A1, $20, $8D
 .byte $AD, $A9, $70, $85, $1D, $4C, $65, $C3, $60, $CA, $D0, $06, $20, $7D, $A1, $4C
 .byte $65, $C3, $A9, $00, $85, $2E, $85, $FD, $85, $2F, $20, $2B, $AE, $A5, $1A, $29
-.byte $03, $D0, $E5, $C6, $1D, $D0, $E1, $A9, $03, $20, $23, $FD, $A2, $00, $86, $28
-.byte $8E, $34, $04, $86, $70, $86, $2B, $E8, $86, $2C, $4C, $29, $C2, $20, $C3, $B9
+.byte $03, $D0, $E5, $C6, $1D, $D0, $E1, $A9, $03, $20, $23, $FD
+
+; set starting stage, setting anything but 00 or 19 gets wonky
+;   LDX #$00
+;   STX $28
+;   STX $0434
+;   STX $70
+;   STX $2B
+;   INX
+;   STX $2C
+jsr set_starting_loop
+nops 11
+
+.byte $4C, $29, $C2, $20, $C3, $B9
 .byte $A5, $1A, $29, $07, $D0, $19, $E6, $1E, $A5, $1E, $0A, $A8, $B9, $17, $BA, $C9
 .byte $FF, $F0, $0E, $8D, $8C, $03, $B9, $18, $BA, $18, $69, $08, $8D, $54, $03, $18
 .byte $60, $38, $60, $A2, $00, $A5, $1E, $C9, $04, $90, $0B, $E8, $C9, $08, $90, $06

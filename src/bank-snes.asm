@@ -80,7 +80,7 @@ initialize_registers:
 
   ; STZ SETINI
   LDA #$00 
-  ; LDA #$01 ; uncomment this to use auto-joypoll
+  LDA #$01 ; uncomment this to use auto-joypoll
   STA NMITIMEN
   STA NMITIMEN_STATE
   STZ VMAIN_STATE
@@ -179,7 +179,7 @@ initialize_registers:
   STZ ATTRIBUTE2_DMA
   STZ ATTRIBUTE_DMA
   LDA #$00
-  ; LDA #$01 ; uncomment this to use auto-poll joypad
+  LDA #$01 ; uncomment this to use auto-poll joypad
   STA NMITIMEN_STATE
   
   jsl spc_init_dpcm
@@ -193,7 +193,12 @@ initialize_registers:
     STA MSU_SELECTED
     jslb check_for_all_tracks_present, $b2
   :
+
+
   jslb do_intro, $b1
+  ; LDA #$00
+  LDA #$01 ; uncomment this to use auto-poll joypad
+  STA NMITIMEN_STATE
   
   PHK
   PLB
@@ -227,7 +232,6 @@ intro_done:
 
   snes_nmi:
     LDA RDNMI 
-
     ; jsr make_the_game_easier
     nops 3
     ; jslb update_values_for_ppu_mask, $a0
@@ -400,7 +404,7 @@ clearvm_to_12:
 : LDA RDNMI
   BPL :-
 
-  LDA #$00
+  LDA #$01
   STA NMITIMEN
   jslb force_blank_no_store, $a0 
   setAXY16
@@ -481,7 +485,7 @@ msu_movie_rti:
 
 check_for_palette_swap:
   LDA $22 ; check that we're paused
-  BEQ :+
+  BEQ :+++
 
   LDA $F5
   AND #$20
@@ -503,7 +507,25 @@ check_for_palette_swap:
   LDA RDNMI
   LDA NMITIMEN_STATE
   STA NMITIMEN
-: rts
+: 
+  ; check for track playlist change, which is L
+  LDA P1_SNES_BUTTONS_TRIGGER
+  AND #$20 ; L button
+  BEQ :++
+
+  INC OPTIONS_MSU_PLAYLIST
+  LDA OPTIONS_MSU_PLAYLIST
+  CMP #$06
+  BNE :+
+    STZ OPTIONS_MSU_PLAYLIST
+  :
+  ; restart the msu playing with new playlist
+  LDA CURRENT_NSF
+  ; set to 0 so it will play the "new" track
+  STZ CURRENT_NSF
+  jslb play_track_hijack, $b2
+: 
+  rts
 
 wait_for_vblank:
   LDA RDNMI

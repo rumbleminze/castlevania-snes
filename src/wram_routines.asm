@@ -427,6 +427,15 @@ play_queued_track:
   jslb play_track_hijack, $b2
   rts
 
+queue_boss_music:
+  LDA #$01
+  STA MSU_FADE_IN_PROGRESS
+
+  LDA #$3F
+  STA $60
+
+  rts
+  
 
 
 bank_switch_rewrite:
@@ -536,11 +545,16 @@ set_starting_lives:
   RTS
 
 set_subweapon_pickup_vars:
+
+  LDA OPTIONS_SUB_WEAPON_SWAP
+  BNE :+
+
   LDA CURRENT_SUB_WEAPON
   BEQ :+
     ; if we're already holding it in the alt don't store it
     STA OTHER_SUB_WEAPON_HELD    
   :
+  
   LDA OPTIONS_DIFFICULTY
   CMP #DIFFICULTY_EASY
   BEQ:+
@@ -559,17 +573,8 @@ set_subweapon_on_death:
   STA $64
 : RTS
 
-knockback_states:
-.byte $05, $05, $05
-
-set_knockback_state:
-  LDY OPTIONS_DIFFICULTY
-  LDA knockback_states, Y
-  STA $046C
-  RTS
-
 starting_hearts:
-.byte 5, 5, 30
+.byte 5, 0, 30
 
 set_starting_hearts:
   PHY
@@ -591,6 +596,15 @@ handle_damage:
     LSR
     STA $4B
 : 
+  LDA OPTIONS_DIFFICULTY
+  CMP #DIFFICULTY_HARD
+  BNE :+
+    ;  double damage
+    LDA $4B
+    ASL 
+    STA $4B
+  :
+  
   PLA
   SEC
   SBC $4B
@@ -605,10 +619,61 @@ handle_boss_damage:
     ; double the damage, which is stored in $0D
     ASL $0D
   :
+
   LDA $01A9
   SBC $0D
   BPL :+
   LDA #$00
 : STA $01A9
   RTS
+
+is_easy:
+  LDA OPTIONS_DIFFICULTY
+  CMP #DIFFICULTY_EASY
+  RTS
+
+set_non_knockback_values:
+  LDA #$10
+  STA $47
+  LDA #$30
+  STA $5B
+
+  rts
+
+
+vs_mode_timers:
+; levels 1-3 are all 170
+.byte $01, $01, $01, $01, $01, $01, $01, $01, $01
+; level 4-6 are 370, 470, 670 
+.byte $03, $03, $03, $04, $04, $04, $06, $06, $06
+
+set_timer:
+  LDA #$00
+  STA $42
+  LDX $28
+  LDA $C9F6,X
+  STA $43
+  
+  LDA OPTIONS_DIFFICULTY
+  CMP #DIFFICULTY_HARD
+  BNE :+ 
+    LDA vs_mode_timers, X
+    STA $43
+    LDA #$70
+    STA $42
+  :
+  RTS
+
+set_starting_loop:
+  PHA
+  LDA OPTIONS_LOOP
+  STA $2B
+  PLA
+  STZ $28    
+  STZ $0434
+  STZ $70
+  LDX #$01
+  STX $2C
+  rts
+
 routines_end:

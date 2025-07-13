@@ -17,6 +17,7 @@ nmi:
     PHX
     PHY
     setAXY8
+
     ; sometimes the NES doesn't RTI, so we're going to set defaults for when it does that here
     ; jslb set_scrolling_hdma_defaults, $a0
     jslb store_current_hdma_values, $a0

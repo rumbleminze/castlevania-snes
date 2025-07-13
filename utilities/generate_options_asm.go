@@ -238,16 +238,24 @@ func main() {
  	defer outAsmFile.Close()
 
 	// These are the options that will be available
-	// I'm leaving the LifeForce here as an example
 	options := []Option{
 		{Index: 0, Name: "PALETTE", Values: []string{"NES", "FCEUX", "GREYSCALE", "NES CLASSIC FBX", "PVM", "REAL", "SMOOTH Y2 FBX", "APPLE II"}},
-		{Index: 1, Name: "DIFICULTY", Values: []string{"NORMAL", "HARD", "EASY"}},
-		{Index: 2, Name: "MSU1", Values: []string{"ON","OFF"}},
-		{Index: 3, Name: "PLAYLIST", Values: []string{"PLAYLIST 1","PLAYLIST 2","PLAYLIST 3","PLAYLIST 4","PLAYLIST 5"}},
-		// {Index: 4, Name: "KNOCKBACK", Values: []string{"ON", "OFF"}},
-		// {Index: 5, Name: "HEARTS", Values: []string{"05", "30"}},
-		// {Index: 2, Name: "LEVEL", Values: []string{"1", "2", "3", "4", "5", "6", "7"}},		
-
+		
+		// Goals for Easy:
+		// x Your default amount of hearts is 30 instead of 5. x
+		// x You start with 9 lives per credit instead of 3.   x
+		// x Less damage is taken from enemies and bosses.
+		// x Bosses take double damage from regular attacks and subweapons.
+		// x Getting hit no longer knocks you backwards. Instead, you just get frozen in place for a split second.
+		// x You retain your subweapon and double/triple shot powerup upon death, though getting a game over will take away the latter.
+		// x The double/triple shot powerups are retained when picking up a different subweapon.
+		
+		{Index: 1, Name: "DIFFICULTY", Values: []string{"NORMAL", "VS. HARD", "EASY"}},
+		{Index: 2, Name: "LOOP", Values: []string{"1ST LOOP","2ND LOOP"}},
+		{Index: 3, Name: "WEAPONSWAP", Values: []string{"ON", "OFF"}},
+		{Index: 4, Name: "MSU1", Values: []string{"ON","OFF"}},
+		{Index: 5, Name: "PLAYLIST", Values: []string{"ORCHESTRAL","AARON LEHNEN","KONAMI","VRC6","MSX", "MELONADEM OPL2"}},
+	
 	}
 
 	outAsmFile.WriteString(fmt.Sprintf("NUM_OPTIONS = %d\n", len(options)))

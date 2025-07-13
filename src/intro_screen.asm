@@ -185,6 +185,9 @@ do_intro:
 
 
 :
+    LDA RDNMI
+    BPL :-
+    
     jsr check_for_code_input
     ; jsr check_for_sprite_swap
     ; jsr check_for_msu

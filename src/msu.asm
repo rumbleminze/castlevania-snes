@@ -22,19 +22,29 @@
 .DEFINE NSF_RESUME      #$FF ; 
 .DEFINE NSF_MUTE        #$55
 
+.DEFINE FADE_RATE #$04
+
 fade_if_needed:
   LDA MSU_FADE_IN_PROGRESS
-  BEQ :+
-    DEC MSU_CURR_VOLUME
-    LDA MSU_CURR_VOLUME
-    STA MSU_VOLUME
+  BEQ :++
+
+    DEC MSU_FADE_DELAY
+    BPL :+
+      LDA FADE_RATE
+      STA MSU_FADE_DELAY
+      
+      DEC MSU_CURR_VOLUME
+    :
+      LDA MSU_CURR_VOLUME
+      STA MSU_VOLUME
 
     ; exit if we're not at 0
     BNE :+
+    STZ MSU_FADE_IN_PROGRESS
     ; if we are at 0, then start the next track
     LDA MSU_FADE_TO_TRACK
+    BEQ :+
     jslb play_track_hijack, $b2
-    STZ MSU_FADE_IN_PROGRESS
     STZ MSU_FADE_TO_TRACK
   :
   RTS
@@ -518,14 +528,14 @@ msu_track_loops:
 
 ; this 0x100 byte lookup table maps the NSF track to the MSU-1 volume ($FF is max, $4F is half)
 msu_track_volume:
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+.byte $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F
+.byte $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F
+.byte $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F
+.byte $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F
+.byte $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F
+.byte $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F
+.byte $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F
+.byte $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F
 
 .byte $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F
 .byte $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F, $4F

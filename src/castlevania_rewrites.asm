@@ -338,4 +338,34 @@ cbde:
   BNE :-
   BEQ cbde
 
+R_BUTTON = $10
+input_additions:
+    ; treat X and A as pushing up and attack
+    LDA P1_SNES_BUTTONS
+    TAY
+    EOR P1_SNES_BUTTONS_HELD
+    AND P1_SNES_BUTTONS
+    STA P1_SNES_BUTTONS_TRIGGER
+    STY P1_SNES_BUTTONS_HELD
 
+    PHA
+    AND #$C0
+    BEQ :+
+        LDA $04
+        ORA #$48
+        STA $04
+    :
+
+    PLA
+    AND #R_BUTTON
+    BEQ :+
+        LDA OTHER_SUB_WEAPON_HELD
+        BEQ :+
+            PHA
+            LDA $015B
+            STA OTHER_SUB_WEAPON_HELD
+            PLA
+            STA $015B
+    :
+    rtl
+    

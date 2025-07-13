@@ -68,14 +68,15 @@ P3_3 = $1E
 
 
 show_options_screen:
-
+    
     LDX #$20
     LDA RDNMI
     : LDA RDNMI
     BPL :-
     DEX
     BPL :-
-
+    
+    jsr read_input
     LDA MSU_AVAILABLE
     BNE :+
         jsr decrement_msu1
@@ -125,15 +126,22 @@ show_options_screen:
 NEEDS_OAM_DMA = $11
 input_loop:
     LDA RDNMI
-    BPL :+
+:   LDA RDNMI
+    BPL :-
+
+    jslb msu_nmi_check, $b2
+    ; we gotta waste some time here
+    LDX #$00
+:   DEX
+    BNE :-
+
+    jsr read_input
     LDA NEEDS_OAM_DMA
     BEQ :+
-    jslb dma_oam_table_long, $a0
-    
-    STZ NEEDS_OAM_DMA
+        jslb dma_oam_table_long, $a0
+        
+        STZ NEEDS_OAM_DMA
 :   
-    jslb msu_nmi_check, $b2
-    jsr read_input
     LDA JOYTRIGGER1
 
     CMP #DOWN_BUTTON
@@ -304,16 +312,10 @@ load_options_sprites:
     RTS
 
 read_input:
-    lda #$01
-    STA JOYSER0
+ 
+    LDA JOY1H
     STA buttons
-    LSR A
-    sta JOYSER0
-@loop:
-    lda JOYSER0
-    lsr a
-    rol buttons
-    bcc @loop
+
 
     lda buttons
     ldy JOYPAD1
@@ -369,7 +371,7 @@ option_0_side_effects:
     rts
 
 
-option_2_side_effects:
+option_4_side_effects:
     ; prevent turning on msu if it's unavailable
     LDA MSU_AVAILABLE
     BNE :++
@@ -386,7 +388,7 @@ option_2_side_effects:
 
     ; fall through to option 5 side effects
 
-option_4_side_effects:
+option_5_side_effects:
 
     LDA RDNMI
     : LDA RDNMI
@@ -406,8 +408,8 @@ option_4_side_effects:
     rts
 
 option_1_side_effects:
-option_3_side_effects: 
-option_5_side_effects:
+option_2_side_effects: 
+option_3_side_effects:
 option_6_side_effects:
 option_7_side_effects:
 option_8_side_effects:
