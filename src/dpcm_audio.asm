@@ -278,28 +278,44 @@ spc_init_dpcm:
     lda #$1D
     jsr spc_upload_byte
 
+    lda #$1B
+    jsr spc_upload_byte
+
+    lda #$1C
+    jsr spc_upload_byte
+
+    lda #$FD
+    jsr spc_upload_byte
+
     ;  $4010-$401f:  frequency cutoff values (see ../nes-spc/spc.asm:268)
     ldy #$4010  ;  Start an upload at $4010 aram
     jsr spc_begin_upload
 
-    lda #$0f
+    lda #$10
     jsr spc_upload_byte
-    lda #$0f
+
+    lda #$01
     jsr spc_upload_byte
-    lda #$0f
+
+    lda #$10
     jsr spc_upload_byte
-    lda #$0f
+    lda #$10
     jsr spc_upload_byte
-    lda #$0f
+    lda #$10
     jsr spc_upload_byte
-    lda #$0F
+    lda #$10
+    jsr spc_upload_byte
+    lda #$10
+    jsr spc_upload_byte
+    lda #$10
+    jsr spc_upload_byte
+    lda #$10
     jsr spc_upload_byte
 
     ;  $4020-$405f: SRCN lookup entries (see ../nes-spc/spc.asm:271)
     ldy #$4020  ;  Start an upload at $4020 aram
     jsr spc_begin_upload
 
-;     upload entry for knee
     rep #$30    ; 16-bit load
     lda #dmc_lookup_start_pos
     sep #$20    ; 8-bit A
@@ -385,6 +401,50 @@ spc_init_dpcm:
     xba
     jsr spc_upload_byte 
 
+; invince start
+    rep #$30    ; 16-bit load
+    lda #((dmc_lookup_start_pos + (money_pickup_end - item_pickup)) + (door_end - treasure))
+    sep #$20    ; 8-bit A
+    jsr spc_upload_byte
+    xba
+    jsr spc_upload_byte   
+    rep #$30    ; 16-bit load
+    lda #((dmc_lookup_start_pos + (money_pickup_end - item_pickup)) + (door_end - treasure))
+    sep #$20    ; 8-bit A
+    jsr spc_upload_byte
+    xba
+    jsr spc_upload_byte   
+
+;invince end
+    rep #$30    ; 16-bit load
+    lda #((dmc_lookup_start_pos + (money_pickup_end - item_pickup)) + (invincibility_pickup_end - treasure))
+    sep #$20    ; 8-bit A
+    jsr spc_upload_byte
+    xba
+    jsr spc_upload_byte 
+
+    rep #$30    ; 16-bit load
+    lda #((dmc_lookup_start_pos + (money_pickup_end - item_pickup)) + (invincibility_pickup_end - treasure))
+    sep #$20    ; 8-bit A
+    jsr spc_upload_byte
+    xba
+    jsr spc_upload_byte 
+
+;simon hit
+    rep #$30    ; 16-bit load
+    lda #((dmc_lookup_start_pos + (money_pickup_end - item_pickup)) + (invincibility_fade_end - treasure))
+    sep #$20    ; 8-bit A
+    jsr spc_upload_byte
+    xba
+    jsr spc_upload_byte 
+
+    rep #$30    ; 16-bit load
+    lda #((dmc_lookup_start_pos + (money_pickup_end - item_pickup)) + (invincibility_fade_end - treasure))
+    sep #$20    ; 8-bit A
+    jsr spc_upload_byte
+    xba
+    jsr spc_upload_byte 
+
 
     ldy #$4060  ;  Start an upload at $4060 aram
     jsr spc_begin_upload
@@ -442,6 +502,33 @@ spc_init_dpcm:
     cpx #(door_end-door)
     bne :-
 
+   ldx #$0000
+
+:
+    lda f:invincibility_pickup,x
+    jsr spc_upload_byte
+    inx
+    cpx #(invincibility_pickup_end-invincibility_pickup)
+    bne :-
+
+   ldx #$0000
+
+:
+    lda f:invincibility_fade,x
+    jsr spc_upload_byte
+    inx
+    cpx #(invincibility_fade_end-invincibility_fade)
+    bne :-
+
+   ldx #$0000
+
+:
+    lda f:simon_hit,x
+    jsr spc_upload_byte
+    inx
+    cpx #(simon_hit_end-simon_hit)
+    bne :-
+
     jsr reset_to_ipc_rom
 
     plp 
@@ -478,7 +565,7 @@ spc_driver_end:
 .SEGMENT "PRGB4"
 brr:
 item_pickup:
- .incbin "sfx/16-item-pickup-16khz.brr"
+ .incbin "sfx/16-item-pickup-11khz.brr"
 item_pickup_end:
 
 whip_18_pickup:
@@ -486,18 +573,30 @@ whip_18_pickup:
 whip_18_pickup_end:
 
 entry_19:
-.incbin "sfx/19-enter-castle-16khz.brr"
+.incbin "sfx/19-enter-castle-11khz.brr"
 entry_19_end:
 
 money_pickup:
-  .incbin "sfx/17-money-pickup-16khz.brr"
+  .incbin "sfx/17-money-pickup-11khz.brr"
 money_pickup_end:
 
 .SEGMENT "PRGB5"
 treasure:
-  .incbin "sfx/23-treasure-11khz.brr"
+  .incbin "sfx/23-treasure-8khz.brr"
 treasure_end:
 
 door:
-.incbin "sfx/1d-door-open.brr"
+.incbin "sfx/1d-door-open-11khz.brr"
 door_end:
+
+invincibility_pickup:
+.incbin "sfx/1b-invincibility-pickup-11khz.brr"
+invincibility_pickup_end:
+
+invincibility_fade:
+.incbin "sfx/1c-invincibility-wear-off-11khz.brr"
+invincibility_fade_end:
+
+simon_hit:
+.incbin "sfx/fd-hit-11khz.brr"
+simon_hit_end:

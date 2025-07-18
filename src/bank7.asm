@@ -975,11 +975,15 @@ jsr set_ppu_control ; STA PpuControl_2000
 .byte $80, $8D, $8F, $04, $60, $A9, $34, $9D, $34, $04, $A9, $54, $9D, $68, $05, $BD
 .byte $88, $04, $09, $80, $9D, $88, $04, $60, $A4, $17, $B9, $34, $04, $C9, $1A, $F0
 .byte $04, $A9, $00, $F0, $03, $B9, $84, $05, $18, $7D, $84, $05, $8D, $A9, $01, $60
-.byte $AD, $A8, $01, $38, $E5, $0C, $8D, $A8, $01
 
 ; boss damage
   jmp handle_boss_damage
-  nops 10
+  nops 19
+  ;   LDA $01A8
+  ; SEC
+  ; SBC $0C
+  ; STA $01A8
+
 ;   LDA $01A9
 ;   SBC $0D
 ;   BPL :+
@@ -1629,10 +1633,9 @@ nops 47
   JMP $FEA4
   ; current 2A03 emulator doesn't deal with these
   ; we'll need to do some brr samples!
-  nops 9 
-;   STX DmcFreq_4010
-;   STY DmcAddress_4012
-;   STA DmcLength_4013
+  STX DmcFreq_4010
+  STY DmcAddress_4012
+  STA DmcLength_4013
 
   LDA #$1F
   jsr WriteAPUControl ; STA ApuStatus_4015

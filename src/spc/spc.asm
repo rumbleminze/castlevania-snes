@@ -193,7 +193,6 @@ start:
         mov $F3,#$1F
         mov $F2,#$37
         mov $F3,#$5F
-        
         mov $F2,#$47
         mov $F3,#$7F
 
@@ -935,15 +934,15 @@ dmc_play:
 .normalspeed:                 ;  Otherwise, normal speed
 
         mov $F2,!DmcPitchL
-        mov $F3,#$00
+        mov $F3,#$5C
         mov $F2,!DmcPitchH
-        mov $F3,#$12
+        mov $F3,#$08
         jmp .selectPlaybackVolume
 .slowspeed:                     
         mov $F2,!DmcPitchL
-        mov $F3,#$45
+        mov $F3,#$70
         mov $F2,!DmcPitchH
-        mov $F3,#$08
+        mov $F3,#$05
 
 .selectPlaybackVolume:
         mov a,dmc_attenuation_cutoff

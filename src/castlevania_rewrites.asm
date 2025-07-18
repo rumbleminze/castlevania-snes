@@ -366,6 +366,68 @@ input_additions:
             STA OTHER_SUB_WEAPON_HELD
             PLA
             STA $015B
+
+            LDA $64
+            PHA
+            LDA OTHER_SUB_WEAPON_MULTIPLIER
+            STA $64
+            PLA
+            STA OTHER_SUB_WEAPON_MULTIPLIER
+
+            LDA #$01
+            STA MULTIPLIER_NEEDS_REDRAW
     :
     rtl
+
+multiplier_tiles:
+.word $207A
+.word $209A
+
+redraw_multiplier:
+  LDA MULTIPLIER_NEEDS_REDRAW
+  BEQ :+
+    STZ MULTIPLIER_NEEDS_REDRAW
+    LDA CURRENT_SUB_WEAPON_MULT
+    BEQ :++
+    CMP #$B0    ; special value for stopwatch
+    BEQ :++
+    setAXY16
+    LDA #$207A
+    STA VMADDL
+
+    LDA CURRENT_SUB_WEAPON_MULT
+    AND #$00FF
+    ASL
+    ASL
+    ORA #$0CA0
+    STA VMDATAL
+    INC
+    INC
+    STA VMDATAL
+    DEC
+    PHA
     
+    LDA #$209A
+    STA VMADDL
+
+    PLA
+    STA VMDATAL
+    INC
+    INC
+    STA VMDATAL
+    setAXY8
+:   rtl
+:   
+    setAXY16
+    LDA #$207A
+    STA VMADDL
+    LDA #$0C00
+    STA VMDATAL
+    STA VMDATAL
+    LDA #$209A
+    STA VMADDL
+    LDA #$0C00
+    STA VMDATAL
+    STA VMDATAL
+    setAXY8
+    rtl

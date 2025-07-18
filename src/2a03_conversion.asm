@@ -85,6 +85,7 @@ SnesUpdateAudio:
     PHP
     setAXY8
 
+
     ; This isn't great but fixes some SFX
     ; but makes the triangle channel never stop
     ; LDA $A08
@@ -92,6 +93,14 @@ SnesUpdateAudio:
     ; STA $A08
 
     JSR SoundEmulateLengthCounters
+
+    ; hack for death animation, 
+    LDA CURRENT_NSF
+    CMP #$4E
+    BNE :+
+        ; if death animation, don't play sound
+        stz SNDCHANSW4015
+    :
 
     LDA SNDCHANSW4015
     BNE :++

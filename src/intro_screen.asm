@@ -1,6 +1,17 @@
 .segment "PRGB1"
 
 intro_screen_data:
+.byte $20, $20
+.byte $e6, $e7, $e6, $e7, $e6, $e7, $e6, $e7 
+.byte $e6, $e7, $e6, $e7, $e6, $e7, $e6, $e7 
+.byte $e6, $e7, $e6, $e7, $e6, $e7, $e6, $e7 
+.byte $e6, $e7, $e6, $e7, $e6, $e7, $e6, $e7 
+.byte $e8, $e9, $e8, $e9, $e8, $e9, $e8, $e9 
+.byte $e8, $e9, $e8, $e9, $e8, $e9, $e8, $e9
+.byte $e8, $e9, $e8, $e9, $e8, $e9, $e8, $e9 
+.byte $e8, $e9, $e8, $e9, $e8, $e9, $e8, $e9
+.byte $ff
+
 .byte $e2, $20, $29, $28, $2b, $2d, $1e, $1d, $00                       ; Ported 
 .byte $1b, $32, $00                                                     ; by 
 .byte $2b, $2e, $26, $1b, $25, $1e, $26, $22, $27, $33, $1e, $00        ; Rumbleminze, 
@@ -16,13 +27,25 @@ intro_screen_data:
 ; .byte $1A, $27, $1D, $34
 ; .byte $2B, $1E, $25, $22, $24, $24,  $ff
 
-.byte $01, $23, $12, $1a, $10, $13, $00                                 ; 2A03
+.byte $E1, $22, $12, $1a, $10, $13, $00                                 ; 2A03
 .byte $2c, $28, $2e, $27, $1d, $00                                      ; SOUND 
 .byte $1e, $26, $2e, $25, $1a, $2d, $28, $2b, $00                       ; EMULATOR
 .byte $1b, $32, $00                                                     ; BY
 .byte $26, $1e, $26, $1b, $25, $1e, $2b, $2c, $ff                       ; MEMBLERS
 
-.byte $78, $23, $2b, $1e, $2f, $1A, $ff ; Version (REV0)
+.byte $58, $23, $2b, $1e, $2f, $10, $ff ; Version (REV0)
+
+; bad ass skulls
+.byte $60, $23
+.byte $e6, $e7, $e6, $e7, $e6, $e7, $e6, $e7 
+.byte $e6, $e7, $e6, $e7, $e6, $e7, $e6, $e7 
+.byte $e6, $e7, $e6, $e7, $e6, $e7, $e6, $e7 
+.byte $e6, $e7, $e6, $e7, $e6, $e7, $e6, $e7 
+.byte $e8, $e9, $e8, $e9, $e8, $e9, $e8, $e9 
+.byte $e8, $e9, $e8, $e9, $e8, $e9, $e8, $e9
+.byte $e8, $e9, $e8, $e9, $e8, $e9, $e8, $e9 
+.byte $e8, $e9, $e8, $e9, $e8, $e9, $e8, $e9
+.byte $ff
 .byte $ff, $ff
 
 write_intro_palette:
@@ -35,14 +58,14 @@ write_intro_palette:
     STA CGDATA
     STA CGDATA
 
-    LDA #$B5
+    LDA #$1f
     STA CGDATA
-    LDA #$56
+    LDA #$3a
     STA CGDATA
     
-    LDA #$29
+    LDA #$d6
     STA CGDATA
-    LDA #$25
+    LDA #$10
     STA CGDATA
 
 ; sprite default colors
@@ -171,7 +194,6 @@ exit_intro_write:
 
 do_intro:
     JSR load_intro_tilesets
-    JSR write_intro_palette
     JSL write_default_palettes_jsl
     
     PHK
@@ -187,7 +209,7 @@ do_intro:
 :
     LDA RDNMI
     BPL :-
-    
+    INC $20
     jsr check_for_code_input
     ; jsr check_for_sprite_swap
     ; jsr check_for_msu

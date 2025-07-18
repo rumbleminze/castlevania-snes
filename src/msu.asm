@@ -22,8 +22,7 @@
 .DEFINE NSF_RESUME      #$FF ; 
 .DEFINE NSF_MUTE        #$55
 
-.DEFINE FADE_RATE #$04
-
+.DEFINE FADE_RATE #$02
 fade_if_needed:
   LDA MSU_FADE_IN_PROGRESS
   BEQ :++
@@ -328,9 +327,9 @@ msu_available:
 
 msu_nmi_check:
 
-  ; no timers in LifeForce, so we can skip that logic
   ; jsr decrement_timer_if_needed
   jsr fade_if_needed
+  jsr check_msu_pause
   
   LDA MSU_TRIGGER
   BEQ :-
@@ -349,10 +348,18 @@ msu_nmi_check:
   LDA msu_track_loops, Y
   STA MSU_CONTROL		; write current loop value
   STA MSU_CURR_CTRL
-  LDA msu_track_volume, Y
+  ; LDA msu_track_volume, Y
+  ; we're balancing all the tracks outside of the hack
+  LDA #$5F
+
   STA MSU_VOLUME		; write max volume value
   STA MSU_CURR_VOLUME
   
+  ; disable any fade that _might_ be happening
+  STZ MSU_FADE_IN_PROGRESS
+  STZ MSU_CURR_FADE_VOLUME
+  STZ MSU_FADE_DELAY
+
   ; jsr set_timer_if_needed
 
   PLB
@@ -389,11 +396,12 @@ set_timer_if_needed:
   LDA track_timers, y
   STA $01
   
-  LDY #$01
-  ; the high bit of the timer is always != 0
+  LDY #$00
   LDA ($00),Y
+  INY
+  ORA ($00),Y
   BEQ :+
-
+    LDA ($00),Y
     STA MSU_TIMER_HB
     DEY
     LDA ($00),Y
@@ -412,13 +420,13 @@ set_timer_if_needed:
 
 decrement_timer_if_needed:
   LDA MSU_TIMER_ON
-  BEQ :++
+  BEQ :+
 
   setAXY16
   DEC MSU_TIMER_LB
   setAXY8
 
-  BNE :++
+  BNE :+
 
   PHB
   PHK
@@ -430,36 +438,38 @@ decrement_timer_if_needed:
   PHA
 
   STZ MSU_TIMER_ON
-  LDA $07FE
-  AND #$BD
-  STA $07FE
+  ; set player state to "respawning"
+  LDA #$06
+  STA $18
 
-  ; LDA #$01
-  ; STA $E0
+ ; no follow up timers in Castlevania, so we can skip that logic 
   ; INC MSU_TIMER_INDX
+  ; ; LDA #$01
+  ; ; STA $E0
+  ; ; 
 
-  LDA MSU_TRACK_IDX
-  ASL
-  TAY
-  LDA track_timers, Y
-  STA $00
-  INY 
-  LDA track_timers, y
-  STA $01
+  ; LDA MSU_TRACK_IDX
+  ; ASL
+  ; TAY
+  ; LDA track_timers, Y
+  ; STA $00
+  ; INY 
+  ; LDA track_timers, y
+  ; STA $01
 
-  LDA MSU_TIMER_INDX
-  ASL
-  INC A
-  TAY
-  LDA ($00),Y
-  beq :+
+  ; LDA MSU_TIMER_INDX
+  ; ASL
+  ; INC A
+  ; TAY
+  ; LDA ($00),Y
+  ; beq :+
 
-    STA MSU_TIMER_HB
-    DEY
-    LDA ($00),Y
-    STA MSU_TIMER_LB
-    INC MSU_TIMER_ON
-  :
+  ;   STA MSU_TIMER_HB
+  ;   DEY
+  ;   LDA ($00),Y
+  ;   STA MSU_TIMER_LB
+  ;   INC MSU_TIMER_ON
+  ; :
   
   PLA
   STA $01
@@ -468,6 +478,32 @@ decrement_timer_if_needed:
   PLB
 : 
   rts
+
+
+pause_msu_for_stopwatch:
+  PHA
+  LDA MSU_SELECTED
+  BEQ :+
+  
+  LDA #$01
+  STA MSU_TEMP_MUTED
+  LDA #$A0
+  STA MSU_MUTE_TIMER
+: PLA
+  rtl
+
+check_msu_pause:
+  LDA MSU_TEMP_MUTED
+  BEQ :+
+    jsl pause_msu_only
+    DEC MSU_MUTE_TIMER
+    BNE :+
+    STZ MSU_TEMP_MUTED
+    jsl resume_msu_only
+  :
+  RTS
+
+
 ; this 0x100 byte lookup table maps the NSF track to the MSU-1 track
 ; MSU Index - NES value - track
 ; 
@@ -505,16 +541,16 @@ msu_track_lookup:
 .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+.byte $0F, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 
 ; this 0x100 byte lookup table maps the NSF track to the if it loops ($03) or no ($01)
 msu_track_loops:
-.byte $01, $03, $03, $03, $03, $03, $03, $03, $01, $03, $01, $01, $01, $01, $01, $01
-.byte $01, $03, $03, $03, $03, $03, $03, $03, $01, $03, $01, $01, $01, $01, $01, $01
-.byte $01, $03, $03, $03, $03, $03, $03, $03, $01, $03, $01, $01, $01, $01, $01, $01
-.byte $01, $03, $03, $03, $03, $03, $03, $03, $01, $03, $01, $01, $01, $01, $01, $01
-.byte $01, $03, $03, $03, $03, $03, $03, $03, $01, $03, $01, $01, $01, $01, $01, $01
-.byte $01, $03, $03, $03, $03, $03, $03, $03, $01, $03, $01, $01, $01, $01, $01, $01
+.byte $01, $03, $03, $03, $03, $03, $03, $03, $01, $03, $01, $01, $01, $01, $01, $03
+.byte $01, $03, $03, $03, $03, $03, $03, $03, $01, $03, $01, $01, $01, $01, $01, $03
+.byte $01, $03, $03, $03, $03, $03, $03, $03, $01, $03, $01, $01, $01, $01, $01, $03
+.byte $01, $03, $03, $03, $03, $03, $03, $03, $01, $03, $01, $01, $01, $01, $01, $03
+.byte $01, $03, $03, $03, $03, $03, $03, $03, $01, $03, $01, $01, $01, $01, $01, $03
+.byte $01, $03, $03, $03, $03, $03, $03, $03, $01, $03, $01, $01, $01, $01, $01, $03
 .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
 .byte $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00, $00
@@ -565,7 +601,7 @@ track_timers:
 .addr no_timer            ; 
 .addr no_timer            ; 
 .addr no_timer            ; 
-.addr no_timer            ; 
+.addr death_jingle            ; 
 .addr no_timer            ; 
 
 .addr no_timer            ; 
@@ -574,7 +610,8 @@ track_timers:
 
 no_timer:
 .word $0000               ; 
-end_of_level_timer:
-.word $014A, $0000        ; End of Level         - 0D
+death_jingle:
+.word $0061, $0000        ; death jingld
 game_over_timer:
 .word $0100, $0000
+

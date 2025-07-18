@@ -24,6 +24,7 @@ nmi:
     jslb dma_oam_table_long, $a0
     jslb check_for_palette_updates, $a0
     jslb check_and_copy_attribute_buffer_l, $a0
+    jslb redraw_multiplier, $a0
     ; jump to NES NMI
     CLC
     LDA ACTIVE_NES_BANK

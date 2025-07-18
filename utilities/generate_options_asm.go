@@ -53,20 +53,24 @@ update_{option_name_lower}:
 :	LDA RDNMI
 	BPL :-
 
+	setAXY16
 	LDA {wram_address}
+	AND #$00FF
+
 	ASL
 	ASL
 	ASL
 	ASL
 	ASL
 	TAY
+
 	LDA #{option_vmaddh}
-	STA VMADDH
-
-	LDA #{option_vmaddl}
+	XBA
+	ORA #{option_vmaddl}
 	STA VMADDL
+	setA8
 
-	LDX #$00
+	LDX #$0000
 :	LDA option_{option_name_lower}_choice_tiles, Y
 	STA VMDATAH
 	LDA option_{option_name_lower}_choice_tiles + 1, Y
@@ -74,9 +78,9 @@ update_{option_name_lower}:
 	INX
 	INY
 	INY
-	CPX #$10
+	CPX #$0010
 	BNE :-
-
+	setAXY8
 	jsr option_{index}_side_effects
 	rts
 
@@ -239,7 +243,25 @@ func main() {
 
 	// These are the options that will be available
 	options := []Option{
-		{Index: 0, Name: "PALETTE", Values: []string{"NES", "FCEUX", "GREYSCALE", "NES CLASSIC FBX", "PVM", "REAL", "SMOOTH Y2 FBX", "APPLE II"}},
+		{Index: 0, Name: "PALETTE", Values: []string{
+		 "NES",					
+		 "FCEUX", 
+		 "KITRINX34 HS",
+		 "KITRINX34",
+
+		 "NES CLASSIC FBX", 
+		 "NINTENDULATOR",
+		 "PLAYCHOICE 10",
+		 "PVM", 
+
+		 "REAL", 
+		 "SMOOTH Y2 FBX", 
+		 "VS CASTLEVANIA",
+		 "GREYSCALE", 
+		 
+		 "APPLE II",
+		 "VIRTUAL BOY",
+		}},
 		
 		// Goals for Easy:
 		// x Your default amount of hearts is 30 instead of 5. x
@@ -254,7 +276,7 @@ func main() {
 		{Index: 2, Name: "LOOP", Values: []string{"1ST LOOP","2ND LOOP"}},
 		{Index: 3, Name: "WEAPONSWAP", Values: []string{"ON", "OFF"}},
 		{Index: 4, Name: "MSU1", Values: []string{"ON","OFF"}},
-		{Index: 5, Name: "PLAYLIST", Values: []string{"ORCHESTRAL","AARON LEHNEN","KONAMI","VRC6","MSX", "MELONADEM OPL2"}},
+		{Index: 5, Name: "PLAYLIST", Values: []string{"ORCHESTRAL","PROG METAL","CHRONICLES","VRC6","MSX SCC", "ADLIB OPL2"}},
 	
 	}
 

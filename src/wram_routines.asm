@@ -428,9 +428,13 @@ play_queued_track:
   rts
 
 queue_boss_music:
-  LDA #$01
-  STA MSU_FADE_IN_PROGRESS
-
+  LDA MSU_SELECTED
+  BEQ :+
+    LDA #$01
+    STA MSU_FADE_IN_PROGRESS
+    LDA #$F5
+    STA $95
+:
   LDA #$3F
   STA $60
 
@@ -487,8 +491,12 @@ sound_hijack:
 : ; handle as normal
   
   jslb play_track_hijack, $b2
-
   STA $07F6
+  LDA CURRENT_NSF
+  CMP #$4E
+  BNE :+
+    sta $07F6
+ :
   STY $07F5
   LDA #$01
   STA $7F
@@ -503,35 +511,84 @@ sound_hijack:
   RTS
 
 
+.define BRR_ITEM_PICKUP         $16
+.define BRR_MONEY_PICKUP        $17
+.define BRR_WHIP_PICKUP         $18
+.define BRR_ENTER_CASTLE        $19
+.define STOPWATCH               $1A
+.define BRR_INVINC_PICKUP       $1B
+.define BRR_INVINCE_WEAR_OFF    $1C
+.define BRR_DOOR_OPEN           $1D
+.define BRR_TREASURE_PICKUP     $23
+.define BRR_SIMON_HIT           $FD
+
+; set brr attenuation to be > 20 if we should halve the volume
+brr_attenuation:
+; 16-17
+.byte $21 ; item pickup
+.byte $10 ; money pickup
+; 18 - 1F
+.byte $21 ; whip pickup
+.byte $10 ; enter castle
+.byte $00 ; stopwatch - n/a
+.byte $10 ; invinc pickup
+.byte $10 ; invinc wear off
+.byte $21 ; door open
+.byte $00 ; not used
+.byte $00 ; not used
+; 20 - 23
+.byte $00   ; not used
+.byte $00   ; not used
+.byte $00   ; not used
+.byte $21 ; simon hit
+
 check_for_brr:
-  CMP #$16
+  CMP #BRR_ITEM_PICKUP
   BEQ :+
-  CMP #$17
+  CMP #BRR_MONEY_PICKUP
   BEQ :+
-  CMP #$18
+  CMP #BRR_WHIP_PICKUP
   BEQ :+
-  CMP #$19
+  CMP #BRR_ENTER_CASTLE
   BEQ :+
-  CMP #$23
+  CMP #BRR_TREASURE_PICKUP
   BEQ :+
-  CMP #$1d
+  CMP #BRR_DOOR_OPEN
   BEQ :+
+  CMP #BRR_INVINCE_WEAR_OFF
+  BEQ :+
+  CMP #BRR_INVINC_PICKUP
+  BEQ :+
+  ; special case for stopwatch playing
+  CMP #STOPWATCH
+  BEQ stopwatch_pause_music
   BRA :++
 
     ; we found our BRR!  YAY
  :  
-    STA DmcAddress_4012
-    
-    LDA #$08
+    ; which sample to play
+    STA DmcAddress_4012    
+
+    ; set this to be > $20 to cut volume in half
+    SEC
+    SBC #$16
+    TAY
+    LDA brr_attenuation, Y
+    ; LDA #$08
     STA DmcCounter_4011
+
     LDA #$08
     STA DmcFreq_4010
+    
     LDA #$10
     ORA APUExtraControl
     STA APUExtraControl
     LDA #BRR_PLAYING 
   :
   RTS
+stopwatch_pause_music:
+    jslb pause_msu_for_stopwatch, $b2
+    RTS
 
 lives_options:
 .byte $03, $03, $09
@@ -551,8 +608,9 @@ set_subweapon_pickup_vars:
 
   LDA CURRENT_SUB_WEAPON
   BEQ :+
-    ; if we're already holding it in the alt don't store it
     STA OTHER_SUB_WEAPON_HELD    
+    LDA $64
+    STA OTHER_SUB_WEAPON_MULTIPLIER
   :
   
   LDA OPTIONS_DIFFICULTY
@@ -571,6 +629,8 @@ set_subweapon_on_death:
   LDA #$00
   STA $015B
   STA $64
+  STA OTHER_SUB_WEAPON_HELD
+  STA OTHER_SUB_WEAPON_MULTIPLIER
 : RTS
 
 starting_hearts:
@@ -620,6 +680,10 @@ handle_boss_damage:
     ASL $0D
   :
 
+  LDA $01A8
+  SEC
+  SBC $0C
+  STA $01A8
   LDA $01A9
   SBC $0D
   BPL :+

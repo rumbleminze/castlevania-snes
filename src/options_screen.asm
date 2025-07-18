@@ -21,17 +21,17 @@ option_tiles:
 .byte $64, $21, $0B, P6, $29, P6, $2b, P6, $1e, P6, $2c, P6, $2c, P6, $34, P6, $2c, P6, $2d, P6, $1a, P6, $2b, P6, $2d
 
 ; PRESS SELECT FOR MSU-1 OPTIONS
-; .addr $2277
-; .byte $05, P6, $29, P6, $2b, P6, $1e, P6, $2c, P6, $2c; PRESS 
+.addr $2277
+.byte $05, P6, $29, P6, $2b, P6, $1e, P6, $2c, P6, $2c; PRESS 
 
-; .addr $2297
-; .byte $06, P6, $2c, P6, $1e, P6, $25, P6, $1e, P6, $1c, P6, $2d ; SELECT
+.addr $2297
+.byte $06, P6, $2c, P6, $1e, P6, $25, P6, $1e, P6, $1c, P6, $2d ; SELECT
 
-; .addr $22B7
-; .byte $08, P6, $1f, P6, $28, P6, $2b, P6, $34, P6, $26, P6, $2c, P6, $2e, P6, $11 ; FOR MSU1       
+.addr $22B7
+.byte $08, P6, $1f, P6, $28, P6, $2b, P6, $34, P6, $26, P6, $2c, P6, $2e, P6, $11 ; FOR MSU1       
 
-; .addr $22D7
-; .byte $07, P6, $28, P6, $29, P6, $2d, P6, $22, P6, $28, P6, $27, P6, $2C ; OPTIONS
+.addr $22D7
+.byte $07, P6, $1c, P6, $2b, P6, $1e, P6, $1d, P6, $22, P6, $2d, P6, $2c ; CREDITS
 
 P0 = $00
 P1 = $04
@@ -82,6 +82,9 @@ show_options_screen:
         jsr decrement_msu1
     :
 
+    LDA #$11
+    STA TM
+
     STZ CURR_OPTION
 
     LDA VMAIN_STATE
@@ -115,6 +118,18 @@ show_options_screen:
     PLB
     JSR load_options_sprites
     jsr write_single_color_tiles_to_3000
+
+    
+    LDA $20
+    AND #$07
+    ; scale down to 0 - 5
+    CMP #$05
+    BCC:+
+        SEC
+        SBC #$05
+    :
+    STA OPTIONS_MSU_PLAYLIST
+
     jsr initialize_options
     jslb dma_oam_table_long, $a0
     LDA #$0F
@@ -171,11 +186,8 @@ input_loop:
 :   CMP #SELECT_BUTTON
     BNE input_loop
     
-    LDA MSU_AVAILABLE
-    beq input_loop
-
-    ; JSR show_msu_track_screen
-    JMP show_options_screen
+   jmp show_credits
+   BRA input_loop
 
 exit_options:
     ; stop msu1
@@ -403,7 +415,7 @@ option_5_side_effects:
     LDA RDNMI
     : LDA RDNMI
     BPL :-
-    LDA #$27
+    LDA #$F0
     jslb msu_check, $B2
     rts
 
@@ -456,4 +468,4 @@ single_color_tiles:
 .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 
-; .include "msu_track_selection_screen.asm"
+.include "msu1-credits.asm"
