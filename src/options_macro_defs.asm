@@ -1,4 +1,4 @@
-NUM_OPTIONS = 6
+NUM_OPTIONS = 7
 
 
 ; Toggle current option
@@ -29,6 +29,10 @@ toggle_current_option:
     CMP #5
     BNE :+
     JMP increment_playlist
+:
+    CMP #6
+    BNE :+
+    JMP increment_rumble
 :
 RTS
 
@@ -62,6 +66,10 @@ decrement_current_option:
     BNE :+
     JMP decrement_playlist
 :
+    CMP #6
+    BNE :+
+    JMP decrement_rumble
+:
 RTS
 
 initialize_options:
@@ -71,6 +79,7 @@ initialize_options:
    jsr update_weaponswap
    jsr update_msu1
    jsr update_playlist
+   jsr update_rumble
     rts
 
 option_palette_choice_tiles:
@@ -444,6 +453,65 @@ update_playlist:
 	jsr option_5_side_effects
 	rts
 
+option_rumble_choice_tiles:
+.byte $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $28, $18, $27, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34
+.byte $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $28, $18, $1F, $18, $1F, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34, $18, $34
+
+decrement_rumble:
+	dec $0866
+	BPL :+
+		LDA #2
+		DEC A
+		STA $0866
+	:
+	BRA update_rumble
+
+increment_rumble:
+	inc $0866
+	lda $0866
+ 	CMP #2
+	BNE :+	
+		LDA #$00
+	:
+	STA $0866
+	BRA update_rumble
+
+update_rumble:
+	LDA RDNMI
+:	LDA RDNMI
+	BPL :-
+
+	setAXY16
+	LDA $0866
+	AND #$00FF
+
+	ASL
+	ASL
+	ASL
+	ASL
+	ASL
+	TAY
+
+	LDA #$21
+	XBA
+	ORA #$2C
+	STA VMADDL
+	setA8
+
+	LDX #$0000
+:	LDA option_rumble_choice_tiles, Y
+	STA VMDATAH
+	LDA option_rumble_choice_tiles + 1, Y
+	STA VMDATAL
+	INX
+	INY
+	INY
+	CPX #$0010
+	BNE :-
+	setAXY8
+	jsr option_6_side_effects
+	rts
+
 
 
 ; Which Option are we on sprites
@@ -454,6 +522,7 @@ option_sprite_y_pos:
 .byte $2F
 .byte $37
 .byte $3F
+.byte $47
 ; X, Y, Tile, attributes
 options_sprites:
 .byte  $04, $17, $3B, $42   ; Option Selection

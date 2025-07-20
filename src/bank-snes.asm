@@ -137,7 +137,7 @@ initialize_registers:
   JSR zero_all_palette
 
   STA OBSEL
-  LDA #$11
+  LDA #$41
   STA BG12NBA
   LDA #$77
   STA BG34NBA
@@ -145,18 +145,22 @@ initialize_registers:
   STA BGMODE
   LDA #$21
   STA BG1SC
-;   LDA #$32
-;   STA BG2SC
+  LDA #$30
+  STA BG2SC
 ;   LDA #$28
 ;   STA BG3SC
 ;   LDA #$7C
 ;   STA BG4SC
   LDA #$80
   STA OAMADDH
+
   LDA #$11
   STA TMW
+
   LDA #$02
   STA W12SEL
+  
+    LDA #$08
   STA WOBJSEL
   
   lda #%00010001
@@ -194,8 +198,10 @@ initialize_registers:
     jslb check_for_all_tracks_present, $b2
   :
 
-
+  ; jslb draw_msu_bg2, $b2
   jslb do_intro, $b1
+  
+  jslb draw_msu_bg2, $b2
   ; LDA #$00
   LDA #$01 ; uncomment this to use auto-poll joypad
   STA NMITIMEN_STATE
@@ -265,9 +271,53 @@ store_current_hdma_values:
     STA DMAP3
 
     LDA #%00001000
-    jsr disable_sprites_under_hud
+    jsr enable_pause_overlay_hdma
     STA HDMAEN
     rtl
+
+enable_pause_overlay_hdma:
+  pha
+  jslb setup_pause_overlay_hdma, $a0
+  jslb setup_tm_hdma, $a0
+
+    LDA #$7E
+    STA A1B4
+    LDA #>PAUSE_HDMA_START
+    STA A1T4H
+    LDA #<PAUSE_HDMA_START
+    STA A1T4L
+    
+    LDA #<(BG2VOFS)
+    STA BBAD4
+    LDA #$02
+    STA DMAP4
+
+    LDA #$7E
+    STA A1B5
+    LDA #>TM_HDMA_START
+    STA A1T5H
+    LDA #<TM_HDMA_START
+    STA A1T5L
+    
+    LDA #<(TM)
+    STA BBAD5
+    STZ DMAP5
+
+    
+    LDA #$7E
+    STA A1B7
+    LDA #>TMW_HDMA_START
+    STA A1T7H
+    LDA #<TMW_HDMA_START
+    STA A1T7L
+    
+    LDA #<(TMW)
+    STA BBAD7
+    STZ DMAP7
+
+    PLA
+    ORA #%10110000
+    rts
 
 disable_sprites_under_hud:
 
@@ -484,46 +534,66 @@ msu_movie_rti:
 
 check_for_palette_swap:
   LDA $22 ; check that we're paused
-  BEQ :+++
+  BEQ not_paused
 
   LDA $F5
   AND #$20
-  BEQ :+
+  BEQ :++
 
-  STZ NMITIMEN
+    STZ NMITIMEN
 
-  jsr wait_for_vblank
+    jsr wait_for_vblank
 
-  INC OPTIONS_PALETTE
-  LDA OPTIONS_PALETTE
-  AND #$07
-  STA OPTIONS_PALETTE
-  LDA #$80
-  STA VMAIN
-  jslb write_palette_data, $a0
-  LDA VMAIN_STATE
-  STA VMAIN
-  LDA RDNMI
-  LDA NMITIMEN_STATE
-  STA NMITIMEN
+    INC OPTIONS_PALETTE
+    LDA OPTIONS_PALETTE
+    CMP #14
+    BNE :+
+      LDA #$00
+    :
+    STA OPTIONS_PALETTE
+    LDA #$80
+    STA VMAIN
+    jslb write_palette_data, $a0
+    LDA VMAIN_STATE
+    STA VMAIN
+    LDA RDNMI
+    LDA NMITIMEN_STATE
+    STA NMITIMEN
 : 
+
   ; check for track playlist change, which is L
   LDA P1_SNES_BUTTONS_TRIGGER
   AND #$20 ; L button
-  BEQ :++
+  BEQ not_paused
+
+  LDA MSU_SELECTED
+  BEQ not_paused
 
   INC OPTIONS_MSU_PLAYLIST
+
   LDA OPTIONS_MSU_PLAYLIST
   CMP #$06
   BNE :+
+    ; jslb stop_msu_only, $b2
+    ; STZ MSU_SELECTED
+    ; BRA not_paused
     STZ OPTIONS_MSU_PLAYLIST
+  : 
+  CMP #$07
+  BNE :+
+    STZ OPTIONS_MSU_PLAYLIST
+    ; LDA #$01
+    ; STA MSU_SELECTED
   :
+
   ; restart the msu playing with new playlist
   LDA CURRENT_NSF
   ; set to 0 so it will play the "new" track
   STZ CURRENT_NSF
   jslb play_track_hijack, $b2
-: 
+  ; just in case we zeroed it out
+  
+not_paused: 
   rts
 
 wait_for_vblank:
@@ -555,8 +625,8 @@ dma_values:
   .byte $00, $12
 
   .include "scrolling.asm"
-  .include "input.asm"  
   .include "tiles.asm"
+  .include "rumble_controller.asm"
   .include "windows.asm"
   .include "hardware-status-switches.asm"
   .include "castlevania_rewrites.asm"

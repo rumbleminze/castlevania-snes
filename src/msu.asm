@@ -531,7 +531,7 @@ msu_track_lookup:
 .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $00, $FF, $FF, $01, $FF, $FF, $02, $FF, $FF
 .byte $03, $FF, $FF, $06, $FF, $FF, $05, $FF, $FF, $04, $FF, $FF, $07, $FF, $FF, $08
 .byte $FF, $FF, $09, $FF, $FF, $0B, $FF, $FF, $0C, $FF, $FF, $0A, $FF, $FF, $0E, $FF
-.byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
+.byte $FF, $0D, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
 .byte $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF, $FF
@@ -615,3 +615,58 @@ death_jingle:
 game_over_timer:
 .word $0100, $0000
 
+
+
+
+draw_msu_bg2:
+  ; use the intro tiles for bg2
+    LDA #$00
+    STA CHR_BANK_BANK_TO_LOAD
+    LDA #$04
+    STA CHR_BANK_TARGET_BANK
+    JSL load_chr_table_to_vm
+    jsr write_msu_pause_tiles
+
+    rtl
+
+
+write_msu_pause_tiles:
+    PHB
+    PHK
+    PLB
+    setXY16
+    LDY #$0000
+
+next_msu_pause_line:
+    ; get starting address
+    LDA msu_pause_tiles, Y
+    CMP #$FF
+    BEQ exit_msu_pause_write
+
+    PHA
+    INY    
+    LDA msu_pause_tiles, Y
+    STA VMADDH
+    PLA
+    STA VMADDL
+    INY
+    LDX #$20
+
+:   LDA msu_pause_tiles, Y
+    STA VMDATAH
+    INY
+    LDA msu_pause_tiles, Y
+    STA VMDATAL
+    INY
+    DEX
+    BEQ next_msu_pause_line
+    BRA :-
+
+exit_msu_pause_write:
+    setAXY8
+    PLB
+    RTS
+
+
+msu_pause_tiles:
+.incbin "src/pause-bg2.bin"

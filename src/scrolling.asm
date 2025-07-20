@@ -254,3 +254,100 @@ simple_scrolling:
   STZ SCROLL_HDMA_START + 2
 : RTL
 
+setup_pause_overlay_hdma:
+PHB
+PHK
+PLB
+
+LDA #$7F
+STA PAUSE_HDMA_START
+STZ PAUSE_HDMA_START + 1
+STZ PAUSE_HDMA_START + 2
+
+LDA #$49
+STA PAUSE_HDMA_START + 3
+STZ PAUSE_HDMA_START + 4
+STZ PAUSE_HDMA_START + 5
+
+LDA #$08
+STA PAUSE_HDMA_START + 6
+LDY OPTIONS_MSU_PLAYLIST
+LDA msu_option_offsets, Y
+STA PAUSE_HDMA_START + 7
+STZ PAUSE_HDMA_START + 8
+
+LDA #$08
+STA PAUSE_HDMA_START + 9
+LDY OPTIONS_PALETTE
+LDA palette_option_offsets, Y
+STA PAUSE_HDMA_START + 10
+STZ PAUSE_HDMA_START + 11
+
+LDA #$08
+STA PAUSE_HDMA_START + 12
+STZ PAUSE_HDMA_START + 13
+STZ PAUSE_HDMA_START + 14
+STZ PAUSE_HDMA_START + 15
+
+
+PLB
+RTL
+
+paused_hdma:
+.byte $7F, $11, $49, $11, $01, $13, $00
+
+not_paused_hdma_TM_11:
+.byte $01, $11, $00 
+
+not_paused_hdma_TM_00:
+.byte $01, $00, $00
+
+setup_tm_hdma:
+  LDA $22
+  BEQ :+
+    ; paused
+    LDA #$7F
+    STA TM_HDMA_START
+    STA TMW_HDMA_START
+
+    LDA #$11
+    STA TM_HDMA_START + 1
+    STZ TMW_HDMA_START + 1
+
+    LDA #$41
+    STA TM_HDMA_START + 2 
+    STA TMW_HDMA_START + 2
+
+    LDA #$11
+    STA TM_HDMA_START + 3   
+    STZ TMW_HDMA_START + 3
+
+    LDA #$01
+    STA TM_HDMA_START + 4 
+    sta TMW_HDMA_START + 4
+
+    LDA #$13
+    STA TM_HDMA_START + 5
+    LDA #%00010011
+    STA TMW_HDMA_START + 5
+
+    STZ TM_HDMA_START + 6
+    STZ TMW_HDMA_START + 6
+    rtl
+
+  :
+
+  STZ TM_HDMA_START
+  LDA #$01
+  STA TMW_HDMA_START
+  STZ TMW_HDMA_START + 1
+  STZ TMW_HDMA_START + 2
+
+  rtl
+  
+
+msu_option_offsets:
+.byte $37, $3F, $47, $4F, $57, $5F, $67
+
+palette_option_offsets:
+.byte $66, $6E, $76, $7E, $86, $8E, $96, $9E, $A6, $AE, $B6, $BE, $C6, $CE, $D6, $DE

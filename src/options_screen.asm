@@ -198,6 +198,11 @@ exit_options:
     STZ MSU_CURR_CTRL    
     STZ MSU_PLAYING
     STZ CURRENT_NSF
+    LDA MSU_SELECTED
+    BNE :+
+        LDA #$06
+        STA OPTIONS_MSU_PLAYLIST
+    :
     jslb msu_nmi_check, $b2
 
     jsr clear_extra_palattes

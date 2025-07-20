@@ -6,13 +6,13 @@ set -e
 # Use generate_options_asm.go to create the options screen
 go run utilities/generate_options_asm.go
 mv options.bin ./src/options.bin
-go run utilities/generate_music_credits.go
-mv msu1-credits.bin ./src/msu1-credits.bin
 mv options_macro_defs.asm ./src/options_macro_defs.asm
+# go run utilities/generate_music_credits.go
+# mv msu1-credits.bin ./src/msu1-credits.bin
 ``
 cd "$(dirname "$0")"
 
-./resources/asar.exe src/spc/spc.asm src/spc/spc.bin
+# ./resources/asar.exe src/spc/spc.asm src/spc/spc.bin
 mkdir -p out
 ca65 ./src/main.asm -o ./out/main.o -g
 ld65 -C ./src/hirom.cfg -o ./out/$GAME.sfc ./out/main.o

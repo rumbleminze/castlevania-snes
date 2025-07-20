@@ -1628,9 +1628,9 @@ nops 47
   LDA #$0F
   jsr WriteAPUControl ; STA ApuStatus_4015
   LDX #$0F
-  LDY #$FD
+  LDY #$FD  ; simon hit
   LDA #$0B
-  JMP $FEA4
+  jsr get_hit_side_effects ; JMP $FEA4 this jump does literally nothing
   ; current 2A03 emulator doesn't deal with these
   ; we'll need to do some brr samples!
   STX DmcFreq_4010

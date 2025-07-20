@@ -277,6 +277,7 @@ func main() {
 		{Index: 3, Name: "WEAPONSWAP", Values: []string{"ON", "OFF"}},
 		{Index: 4, Name: "MSU1", Values: []string{"ON","OFF"}},
 		{Index: 5, Name: "PLAYLIST", Values: []string{"ORCHESTRAL","PROG METAL","CHRONICLES","VRC6","MSX SCC", "ADLIB OPL2"}},
+		{Index: 6, Name: "RUMBLE", Values: []string{"ON","OFF"}},
 	
 	}
 

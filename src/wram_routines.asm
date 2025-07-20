@@ -430,6 +430,12 @@ play_queued_track:
 queue_boss_music:
   LDA MSU_SELECTED
   BEQ :+
+    ; don't so this on stage 18 / 36
+    LDA $28
+    CMP #$12
+    BEQ :+
+    CMP #$24
+    BEQ :+
     LDA #$01
     STA MSU_FADE_IN_PROGRESS
     LDA #$F5
@@ -482,6 +488,7 @@ c0c0_rewrite:
 
 .define BRR_PLAYING $FF
 sound_hijack:
+  jslb check_for_rumble, $a0
   JSR check_for_brr
   CMP #BRR_PLAYING
   ; if brr is playing pretend sfx are muted and just rts
@@ -540,7 +547,7 @@ brr_attenuation:
 .byte $00   ; not used
 .byte $00   ; not used
 .byte $00   ; not used
-.byte $21 ; simon hit
+.byte $10   ; tresure
 
 check_for_brr:
   CMP #BRR_ITEM_PICKUP
@@ -738,6 +745,12 @@ set_starting_loop:
   STZ $70
   LDX #$01
   STX $2C
+  rts
+
+get_hit_side_effects:
+  LDA #$01
+  STA RUMBLE_WAVE_FORM_PLAYING
+  STZ RUMBLE_WAVE_FORM_IDX
   rts
 
 routines_end:

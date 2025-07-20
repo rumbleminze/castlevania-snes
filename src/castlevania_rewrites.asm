@@ -377,6 +377,8 @@ input_additions:
             LDA #$01
             STA MULTIPLIER_NEEDS_REDRAW
     :
+    jsr play_rumble_wave
+    jsr send_rumble
     rtl
 
 multiplier_tiles:
@@ -386,6 +388,9 @@ multiplier_tiles:
 redraw_multiplier:
   LDA MULTIPLIER_NEEDS_REDRAW
   BEQ :+
+    LDA $18
+    CMP #$0E  ; we're in the 1 falling cutscene, don't do any drawing
+    BEQ :+
     STZ MULTIPLIER_NEEDS_REDRAW
     LDA CURRENT_SUB_WEAPON_MULT
     BEQ :++

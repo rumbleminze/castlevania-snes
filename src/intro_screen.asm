@@ -325,17 +325,17 @@ load_intro_tilesets:
     STA CHR_BANK_TARGET_BANK
     JSL load_chr_table_to_vm
 
-    LDA #$01
-    STA CHR_BANK_BANK_TO_LOAD
-    LDA #$04
-    STA CHR_BANK_TARGET_BANK
-    JSL load_chr_table_to_vm
+    ; LDA #$01
+    ; STA CHR_BANK_BANK_TO_LOAD
+    ; LDA #$04
+    ; STA CHR_BANK_TARGET_BANK
+    ; JSL load_chr_table_to_vm
     
-    LDA #$02
-    STA CHR_BANK_BANK_TO_LOAD
-    LDA #$05
-    STA CHR_BANK_TARGET_BANK
-    JSL load_chr_table_to_vm
+    ; LDA #$02
+    ; STA CHR_BANK_BANK_TO_LOAD
+    ; LDA #$05
+    ; STA CHR_BANK_TARGET_BANK
+    ; JSL load_chr_table_to_vm
 
     rts
 
