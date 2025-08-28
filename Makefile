@@ -5,16 +5,20 @@ OUTDIR := out
 SRCDIR := src
 CFG := $(SRCDIR)/hirom.cfg
 
+# Detect required tools
 CA65 := $(shell which ca65)
 LD65 := $(shell which ld65)
 GO   := $(shell which go)
 
-# Ensure cc65 tools are found
+# Ensure required tools are in PATH
 ifeq ($(CA65),)
   $(error ca65 not found in PATH, please install cc65)
 endif
 ifeq ($(LD65),)
   $(error ld65 not found in PATH, please install cc65)
+endif
+ifeq ($(GO),)
+  $(error go not found in PATH, please install Go)
 endif
 
 all: $(OUTDIR)/$(GAME).sfc
