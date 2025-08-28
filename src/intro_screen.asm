@@ -33,7 +33,7 @@ intro_screen_data:
 .byte $1b, $32, $00                                                     ; BY
 .byte $26, $1e, $26, $1b, $25, $1e, $2b, $2c, $ff                       ; MEMBLERS
 
-.byte $58, $23, $2b, $1e, $2f, $10, $ff ; Version (REV0)
+.byte $58, $23, $2b, $1e, $2f, $11, $ff ; Version (REV0)
 
 ; bad ass skulls
 .byte $60, $23

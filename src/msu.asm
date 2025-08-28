@@ -515,14 +515,14 @@ check_msu_pause:
 ; 05 - 36 - Heart of Fire (Stage 5)
 ; 06 - 33 - Out of Time (Stage 6)
 ; 07 - 3C - Nothing to Lose (Stage 7)
-; 08 - 3F (but how?) - Poison Mind (Boss)
+; 08 - 3F - Poison Mind (Boss)
 ; 09 - 42 - Black Night (Last Boss)
 ; 0A - 4B - All Clear (no looping)
 ; 0B - 45 - Voyager (Ending)
 ; 0C - 48 - Stage Clear (no looping)
 ; 0D - 51 - Game Over (no looping)
 ; 0E - 4E - Lose Life (no looping)
-; 0F - ?? - Underground (menu theme)
+; 0F - .. - Underground (menu theme)
 ; 
 ; other soundtracks are 0x[12345]_
 msu_track_lookup:

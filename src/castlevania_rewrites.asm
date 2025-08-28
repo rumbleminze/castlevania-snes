@@ -339,8 +339,18 @@ cbde:
   BEQ cbde
 
 R_BUTTON = $10
+
+button_configs_fire_subweapon:
+.byte $C0, $10
+
+button_configs_swap:
+.byte $10, $C0
+
 input_additions:
     ; treat X and A as pushing up and attack
+    PHB
+    PHK
+    PLB
     LDA P1_SNES_BUTTONS
     TAY
     EOR P1_SNES_BUTTONS_HELD
@@ -349,7 +359,8 @@ input_additions:
     STY P1_SNES_BUTTONS_HELD
 
     PHA
-    AND #$C0
+    LDY OPTIONS_CONTROLS
+    AND button_configs_fire_subweapon, Y
     BEQ :+
         LDA $04
         ORA #$48
@@ -357,7 +368,7 @@ input_additions:
     :
 
     PLA
-    AND #R_BUTTON
+    AND button_configs_swap, Y
     BEQ :+
         LDA OTHER_SUB_WEAPON_HELD
         BEQ :+
@@ -379,6 +390,7 @@ input_additions:
     :
     jsr play_rumble_wave
     jsr send_rumble
+    PLB
     rtl
 
 multiplier_tiles:
