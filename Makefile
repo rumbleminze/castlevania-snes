@@ -25,7 +25,7 @@ GAME := Castlevania
 OUTDIR := out
 SRCDIR := src
 
-.PHONY: all clean run
+.PHONY: all clean run rebuild_wram
 
 all: $(OUTDIR)/$(GAME).sfc
 
@@ -39,16 +39,26 @@ $(SRCDIR)/options.bin $(SRCDIR)/options_macro_defs.asm:
 	mv options.bin $(SRCDIR)/options.bin
 	mv options_macro_defs.asm $(SRCDIR)/options_macro_defs.asm
 
-# Build main.o (depends on main.asm, options, and wram_routines.bin if it exists)
+# Ensure wram_routines.bin exists for first build
+$(SRCDIR)/wram_routines.bin:
+	@echo "Creating empty wram_routines.bin for first build"
+	touch $(SRCDIR)/wram_routines.bin
+
+# Build main.o (depends on main.asm, options, and wram_routines.bin)
 $(OUTDIR)/main.o: $(SRCDIR)/main.asm $(SRCDIR)/options.bin $(SRCDIR)/wram_routines.bin | $(OUTDIR)
 	$(CA65) $(SRCDIR)/main.asm -o $(OUTDIR)/main.o -g
 
-# Extract WRAM routines from ROM if missing or outdated
-$(SRCDIR)/wram_routines.bin: $(OUTDIR)/$(GAME).sfc
+# Build ROM (depends on main.o)
+$(OUTDIR)/$(GAME).sfc: $(OUTDIR)/main.o | $(OUTDIR)
+	$(LD65) -C $(SRCDIR)/hirom.cfg -o $(OUTDIR)/$(GAME).sfc $(OUTDIR)/main.o
+
+# Always extract WRAM routines after ROM is built
+extract_wram: $(OUTDIR)/$(GAME).sfc
 	dd if=$(OUTDIR)/$(GAME).sfc of=$(SRCDIR)/wram_routines.bin bs=1 skip=$$((0x1800)) count=$$((0x800))
 
-# Build ROM (depends on main.o and wram_routines.bin)
-$(OUTDIR)/$(GAME).sfc: $(OUTDIR)/main.o $(SRCDIR)/wram_routines.bin | $(OUTDIR)
+# Optional: rebuild ROM if WRAM routines change
+rebuild_wram: extract_wram
+	$(CA65) $(SRCDIR)/main.asm -o $(OUTDIR)/main.o -g
 	$(LD65) -C $(SRCDIR)/hirom.cfg -o $(OUTDIR)/$(GAME).sfc $(OUTDIR)/main.o
 
 # Run the ROM in the most accurate emulator available
