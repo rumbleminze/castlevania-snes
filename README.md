@@ -52,7 +52,7 @@ Track Indexes:
 
 Additionally, this romhack supports 6 playlists.  For each playlist after the first, add 16 to each track number for the next playlist (1-15, 16-31, 32-47, etc)
 
-Included are 6 sets of PCMs for Life Force:
+Included are 6 sets of PCMs:
 Orchestral Cover - Video Game Music Revisited, Evelyn Lark
 Prog Metal - Aaron Lehnen "MnG"
 Chronicles Arrange - Konami
