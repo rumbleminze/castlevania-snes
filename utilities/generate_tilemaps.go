@@ -48,38 +48,40 @@ func convertStringToTiles(name string) []byte {
 
 
 func main() {
-	var outFile, _ = os.Create("pause-bg2.bin")
-	defer outFile.Close()
-
-	// musicCreditLines := []string{
-	// 	"CASTLEVANIA MSU1 MUSIC CREDITS ",
-	// 	" ",
-	// 	" ",
-	// 	" ",
-	// 	"ORCHESTRAL - VG MUSIC REVISITED",
-	// 	"                EVELYN LARK",
-	// 	" ",
-	// 	"PROG METAL - AARON LEHNEN",
-	// 	" ",
-	// 	"CHRONICLES - KONAMI",
-	// 	" ",
-	// 	"VRC6 - YONE2008",
-	// 	" ",
-	// 	"MSX SCC - JAN VAN VALBURG",
-	// 	"            SL3DZ",
-	// 	" ",
-	// 	"ADLIB OPL2 - MELONADEM",
-	// 	" ",
-	// 	" ",
-	// 	" ",
-	// 	"ARRANGED BY - BATTY",
-	// 	" ",
-	// 	"PRESS START TO RETURN",
-	// }
+	var msu1CreditsOutFile, _ = os.Create("msu1-credits.bin")
+	defer msu1CreditsOutFile.Close()
+	var bg2OutFile, _ = os.Create("pause-bg2.bin")
+	defer bg2OutFile.Close()
 
 	musicCreditLines := []string{
-		 "^&    ORCHESTRAL   ^&",
+		"CASTLEVANIA MSU1 MUSIC CREDITS ",
+		" ",
+		" ",
+		" ",
+		"ORCHESTRAL - VG MUSIC REVISITED",
+		"                EVELYN LARK",
+		" ",
+		"PROG METAL - AARON LEHNEN",
+		" ",
+		"CHRONICLES - KONAMI",
+		" ",
+		"VRC6 - YONE2008",
+		" ",
+		"MSX SCC - JAN VAN VALBURG",
+		"            SL3DZ",
+		" ",
+		"ADLIB OPL2 - MELONADEM",
+		" ",
+		" ",
+		" ",
+		"ARRANGED BY - BATTY",
+		" ",
+		"PRESS START TO RETURN",
+	}
+
+	pauseBg2Lines := []string{
 		 "^&    PROG METAL   ^&",
+		 "^&    ORCHESTRAL   ^&",
 		 "^&    CHRONICLES   ^&",
 		 "^&       VRC6      ^&",
 		 "^&      MSX SCC    ^&",
@@ -101,16 +103,30 @@ func main() {
 		 "*(     APPLE II    *(",
 		 "*(    VIRTUAL BOY  *(",
 	}
+
+
 	for i, line := range musicCreditLines {
 		formattedLine := formatStringTo32Chars(line)
 		tiles := convertStringToTiles(formattedLine)
 
 		address := startingAddress + (i * 32)
-		outFile.Write([]byte{byte(address & 0xFF), byte((address >> 8) & 0xFF)})
-		outFile.Write(tiles)
+		msu1CreditsOutFile.Write([]byte{byte(address & 0xFF), byte((address >> 8) & 0xFF)})
+		msu1CreditsOutFile.Write(tiles)
 		
 	}
 
-	outFile.Write([]byte{0xFF, 0xFF}) // End of credits marker
+	msu1CreditsOutFile.Write([]byte{0xFF, 0xFF}) // End of credits marker
 
+	
+	for i, line := range pauseBg2Lines {
+		formattedLine := formatStringTo32Chars(line)
+		tiles := convertStringToTiles(formattedLine)
+
+		address := startingAddress + (i * 32)
+		bg2OutFile.Write([]byte{byte(address & 0xFF), byte((address >> 8) & 0xFF)})
+		bg2OutFile.Write(tiles)
+		
+	}
+
+	bg2OutFile.Write([]byte{0xFF, 0xFF}) // End of credits marker
 }
